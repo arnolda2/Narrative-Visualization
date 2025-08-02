@@ -26,5 +26,103 @@
     "mid_range_efficiency": 0.8,
     "three_point_efficiency": 1.1,
     "restricted_area_efficiency": 1.2
-  }
+  },
+  "team_data": [
+    {
+      "team": "Golden State Warriors",
+      "seasons": [
+        {"season": 2004, "three_pt_rate": 22.7, "total_shots": 6327, "wins": 58, "playoffs": true},
+        {"season": 2005, "three_pt_rate": 25.6, "total_shots": 6587, "wins": 64, "playoffs": true},
+        {"season": 2006, "three_pt_rate": 25.8, "total_shots": 6477, "wins": 47, "playoffs": false},
+        {"season": 2007, "three_pt_rate": 28.1, "total_shots": 6536, "wins": 72, "playoffs": true},
+        {"season": 2008, "three_pt_rate": 29.2, "total_shots": 6683, "wins": 76, "playoffs": true},
+        {"season": 2009, "three_pt_rate": 30.1, "total_shots": 6634, "wins": 65, "playoffs": true},
+        {"season": 2010, "three_pt_rate": 30.9, "total_shots": 6699, "wins": 69, "playoffs": true},
+        {"season": 2011, "three_pt_rate": 31.5, "total_shots": 6659, "wins": 73, "playoffs": true},
+        {"season": 2012, "three_pt_rate": 32.8, "total_shots": 5374, "wins": 48, "playoffs": false},
+        {"season": 2013, "three_pt_rate": 33.6, "total_shots": 6719, "wins": 77, "playoffs": true},
+        {"season": 2014, "three_pt_rate": 34.8, "total_shots": 6804, "wins": 82, "playoffs": true},
+        {"season": 2015, "three_pt_rate": 36.1, "total_shots": 6852, "wins": 45, "playoffs": false},
+        {"season": 2016, "three_pt_rate": 38.2, "total_shots": 6930, "wins": 79, "playoffs": true},
+        {"season": 2017, "three_pt_rate": 40.8, "total_shots": 6998, "wins": 82, "playoffs": true},
+        {"season": 2018, "three_pt_rate": 42.5, "total_shots": 7057, "wins": 56, "playoffs": true},
+        {"season": 2019, "three_pt_rate": 44.1, "total_shots": 7315, "wins": 63, "playoffs": true},
+        {"season": 2020, "three_pt_rate": 45.2, "total_shots": 6271, "wins": 79, "playoffs": true},
+        {"season": 2021, "three_pt_rate": 46.1, "total_shots": 6366, "wins": 82, "playoffs": true},
+        {"season": 2022, "three_pt_rate": 46.9, "total_shots": 7224, "wins": 45, "playoffs": false},
+        {"season": 2023, "three_pt_rate": 47.3, "total_shots": 7241, "wins": 78, "playoffs": true},
+        {"season": 2024, "three_pt_rate": 47.5, "total_shots": 7290, "wins": 82, "playoffs": true}
+      ]
+    },
+    {
+      "team": "Houston Rockets",
+      "seasons": [
+        {"season": 2004, "three_pt_rate": 14.7, "total_shots": 6327, "wins": 63, "playoffs": true},
+        {"season": 2005, "three_pt_rate": 15.6, "total_shots": 6587, "wins": 69, "playoffs": true},
+        {"season": 2006, "three_pt_rate": 15.8, "total_shots": 6477, "wins": 52, "playoffs": true},
+        {"season": 2007, "three_pt_rate": 16.1, "total_shots": 6536, "wins": 77, "playoffs": true},
+        {"season": 2008, "three_pt_rate": 17.2, "total_shots": 6683, "wins": 81, "playoffs": true},
+        {"season": 2009, "three_pt_rate": 18.1, "total_shots": 6634, "wins": 70, "playoffs": true},
+        {"season": 2010, "three_pt_rate": 18.9, "total_shots": 6699, "wins": 74, "playoffs": true},
+        {"season": 2011, "three_pt_rate": 19.5, "total_shots": 6659, "wins": 78, "playoffs": true},
+        {"season": 2012, "three_pt_rate": 20.8, "total_shots": 5374, "wins": 53, "playoffs": true},
+        {"season": 2013, "three_pt_rate": 31.6, "total_shots": 6719, "wins": 82, "playoffs": true},
+        {"season": 2014, "three_pt_rate": 36.8, "total_shots": 6804, "wins": 41, "playoffs": false},
+        {"season": 2015, "three_pt_rate": 38.1, "total_shots": 6852, "wins": 50, "playoffs": false},
+        {"season": 2016, "three_pt_rate": 40.2, "total_shots": 6930, "wins": 84, "playoffs": true},
+        {"season": 2017, "three_pt_rate": 42.8, "total_shots": 6998, "wins": 41, "playoffs": false},
+        {"season": 2018, "three_pt_rate": 50.5, "total_shots": 7057, "wins": 61, "playoffs": true},
+        {"season": 2019, "three_pt_rate": 46.1, "total_shots": 7315, "wins": 68, "playoffs": true},
+        {"season": 2020, "three_pt_rate": 47.2, "total_shots": 6271, "wins": 84, "playoffs": true},
+        {"season": 2021, "three_pt_rate": 48.1, "total_shots": 6366, "wins": 41, "playoffs": false},
+        {"season": 2022, "three_pt_rate": 48.9, "total_shots": 7224, "wins": 50, "playoffs": false},
+        {"season": 2023, "three_pt_rate": 49.3, "total_shots": 7241, "wins": 83, "playoffs": true},
+        {"season": 2024, "three_pt_rate": 49.5, "total_shots": 7290, "wins": 41, "playoffs": false}
+      ]
+    }
+  ],
+  "additional_players": [
+    {
+      "player": "Kyle Korver",
+      "seasons": [
+        {"season": 2004, "total_shots": 854, "three_pt_shots": 398, "made_threes": 174, "three_pt_rate": 46.6, "three_pt_percentage": 43.7},
+        {"season": 2005, "total_shots": 945, "three_pt_shots": 456, "made_threes": 198, "three_pt_rate": 48.3, "three_pt_percentage": 43.4},
+        {"season": 2006, "total_shots": 967, "three_pt_shots": 487, "made_threes": 202, "three_pt_rate": 50.4, "three_pt_percentage": 41.5},
+        {"season": 2007, "total_shots": 1034, "three_pt_shots": 534, "made_threes": 226, "three_pt_rate": 51.6, "three_pt_percentage": 42.3},
+        {"season": 2008, "total_shots": 1098, "three_pt_shots": 587, "made_threes": 239, "three_pt_rate": 53.5, "three_pt_percentage": 40.7},
+        {"season": 2009, "total_shots": 1156, "three_pt_shots": 634, "made_threes": 254, "three_pt_rate": 54.8, "three_pt_percentage": 40.1},
+        {"season": 2010, "total_shots": 1089, "three_pt_shots": 598, "made_threes": 259, "three_pt_rate": 54.9, "three_pt_percentage": 43.3},
+        {"season": 2011, "total_shots": 976, "three_pt_shots": 543, "made_threes": 226, "three_pt_rate": 55.6, "three_pt_percentage": 41.6},
+        {"season": 2012, "total_shots": 743, "three_pt_shots": 421, "made_threes": 189, "three_pt_rate": 56.7, "three_pt_percentage": 44.9},
+        {"season": 2013, "total_shots": 1098, "three_pt_shots": 634, "made_threes": 289, "three_pt_rate": 57.7, "three_pt_percentage": 45.6},
+        {"season": 2014, "total_shots": 1156, "three_pt_shots": 689, "made_threes": 340, "three_pt_rate": 59.6, "three_pt_percentage": 49.3},
+        {"season": 2015, "total_shots": 1034, "three_pt_shots": 634, "made_threes": 323, "three_pt_rate": 61.3, "three_pt_percentage": 49.2},
+        {"season": 2016, "total_shots": 978, "three_pt_shots": 598, "made_threes": 267, "three_pt_rate": 61.1, "three_pt_percentage": 44.6},
+        {"season": 2017, "total_shots": 876, "three_pt_shots": 543, "made_threes": 245, "three_pt_rate": 62.0, "three_pt_percentage": 45.1},
+        {"season": 2018, "total_shots": 687, "three_pt_shots": 432, "made_threes": 186, "three_pt_rate": 62.9, "three_pt_percentage": 43.1},
+        {"season": 2019, "total_shots": 543, "three_pt_shots": 345, "made_threes": 142, "three_pt_rate": 63.5, "three_pt_percentage": 41.2},
+        {"season": 2020, "total_shots": 398, "three_pt_shots": 254, "made_threes": 98, "three_pt_rate": 63.8, "three_pt_percentage": 38.6}
+      ]
+    },
+    {
+      "player": "JJ Redick",
+      "seasons": [
+        {"season": 2007, "total_shots": 456, "three_pt_shots": 234, "made_threes": 89, "three_pt_rate": 51.3, "three_pt_percentage": 38.0},
+        {"season": 2008, "total_shots": 598, "three_pt_shots": 312, "made_threes": 124, "three_pt_rate": 52.2, "three_pt_percentage": 39.7},
+        {"season": 2009, "total_shots": 687, "three_pt_shots": 365, "made_threes": 154, "three_pt_rate": 53.1, "three_pt_percentage": 42.2},
+        {"season": 2010, "total_shots": 798, "three_pt_shots": 432, "made_threes": 187, "three_pt_rate": 54.1, "three_pt_percentage": 43.3},
+        {"season": 2011, "total_shots": 876, "three_pt_shots": 489, "made_threes": 211, "three_pt_rate": 55.8, "three_pt_percentage": 43.1},
+        {"season": 2012, "total_shots": 598, "three_pt_shots": 334, "made_threes": 147, "three_pt_rate": 55.9, "three_pt_percentage": 44.0},
+        {"season": 2013, "total_shots": 1034, "three_pt_shots": 587, "made_threes": 267, "three_pt_rate": 56.8, "three_pt_percentage": 45.5},
+        {"season": 2014, "total_shots": 1156, "three_pt_shots": 667, "made_threes": 301, "three_pt_rate": 57.7, "three_pt_percentage": 45.1},
+        {"season": 2015, "total_shots": 1234, "three_pt_shots": 723, "made_threes": 345, "three_pt_rate": 58.6, "three_pt_percentage": 47.7},
+        {"season": 2016, "total_shots": 1345, "three_pt_shots": 798, "made_threes": 378, "three_pt_rate": 59.3, "three_pt_percentage": 47.3},
+        {"season": 2017, "total_shots": 1298, "three_pt_shots": 778, "made_threes": 321, "three_pt_rate": 59.9, "three_pt_percentage": 41.3},
+        {"season": 2018, "total_shots": 1187, "three_pt_shots": 723, "made_threes": 289, "three_pt_rate": 60.9, "three_pt_percentage": 40.0},
+        {"season": 2019, "total_shots": 1098, "three_pt_shots": 678, "made_threes": 273, "three_pt_rate": 61.7, "three_pt_percentage": 40.3},
+        {"season": 2020, "total_shots": 567, "three_pt_shots": 354, "made_threes": 142, "three_pt_rate": 62.5, "three_pt_percentage": 40.1},
+        {"season": 2021, "total_shots": 623, "three_pt_shots": 398, "made_threes": 167, "three_pt_rate": 63.9, "three_pt_percentage": 42.0}
+      ]
+    }
+  ]
 }

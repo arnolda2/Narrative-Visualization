@@ -71,16 +71,34 @@
             <div class="explorer-dashboard" id="explorer-dashboard" style="display: none;">
                 <div class="explorer-controls">
                     <div class="control-section">
-                        <h3>🏀 Player Analysis</h3>
-                        <div class="player-selector">
-                            <select id="player-select" class="modern-select">
-                                <option value="Stephen Curry">Stephen Curry</option>
-                                <option value="James Harden">James Harden</option>
-                                <option value="Klay Thompson">Klay Thompson</option>
-                                <option value="Ray Allen">Ray Allen</option>
-                                <option value="Damian Lillard">Damian Lillard</option>
-                            </select>
+                        <h3>🎯 Analysis Type</h3>
+                        <div class="analysis-toggles">
+                            <button class="analysis-btn active" data-type="players">🏀 Players</button>
+                            <button class="analysis-btn" data-type="teams">🏟️ Teams</button>
                         </div>
+                    </div>
+
+                    <div class="control-section" id="player-controls">
+                        <h3>🏀 Player Selection</h3>
+                        <div class="search-container">
+                            <input type="text" id="player-search" class="search-input" placeholder="Search players...">
+                            <div class="search-dropdown" id="player-dropdown"></div>
+                        </div>
+                        <div class="selected-items" id="selected-players">
+                            <div class="selected-item" data-player="Stephen Curry">
+                                <span>Stephen Curry</span>
+                                <button class="remove-btn">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section" id="team-controls" style="display: none;">
+                        <h3>🏟️ Team Selection</h3>
+                        <div class="search-container">
+                            <input type="text" id="team-search" class="search-input" placeholder="Search teams...">
+                            <div class="search-dropdown" id="team-dropdown"></div>
+                        </div>
+                        <div class="selected-items" id="selected-teams"></div>
                     </div>
                     
                     <div class="control-section">
@@ -100,25 +118,51 @@
                     <div class="control-section">
                         <h3>📊 View Mode</h3>
                         <div class="view-toggles">
-                            <button class="toggle-btn active" data-view="evolution">Evolution</button>
-                            <button class="toggle-btn" data-view="comparison">Compare Players</button>
-                            <button class="toggle-btn" data-view="heatmap">Shot Distribution</button>
+                            <button class="toggle-btn active" data-view="evolution">📈 Evolution</button>
+                            <button class="toggle-btn" data-view="comparison">⚖️ Comparison</button>
+                            <button class="toggle-btn" data-view="heatmap">🎯 Heat Map</button>
+                            <button class="toggle-btn" data-view="performance">📊 Performance</button>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>🔧 Filters</h3>
+                        <div class="filter-controls">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" id="playoff-only" />
+                                <span>Playoff teams only</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" id="winning-teams" />
+                                <span>Winning record only</span>
+                            </label>
                         </div>
                     </div>
                 </div>
 
                 <div class="explorer-visualizations">
                     <div class="explorer-main-chart">
+                        <div class="chart-header">
+                            <h3 id="chart-title">Player Evolution Analysis</h3>
+                            <div class="chart-actions">
+                                <button class="action-btn" id="export-btn">📊 Export</button>
+                                <button class="action-btn" id="fullscreen-btn">📺 Fullscreen</button>
+                            </div>
+                        </div>
                         <svg id="explorer-main"></svg>
                     </div>
                     <div class="explorer-side-charts">
                         <div class="side-chart">
-                            <h4>Career Statistics</h4>
-                            <div id="player-stats"></div>
+                            <h4 id="stats-title">Career Statistics</h4>
+                            <div id="entity-stats"></div>
                         </div>
                         <div class="side-chart">
-                            <h4>Shot Efficiency</h4>
-                            <svg id="efficiency-chart"></svg>
+                            <h4>Performance Metrics</h4>
+                            <div id="performance-metrics"></div>
+                        </div>
+                        <div class="side-chart">
+                            <h4>Trend Analysis</h4>
+                            <svg id="trend-chart"></svg>
                         </div>
                     </div>
                 </div>

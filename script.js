@@ -29,13 +29,21 @@ let state = {
     currentScene: 0,
     totalScenes: 5,
     data: {},
+    analysisType: 'players', // 'players' or 'teams'
     selectedPlayer: 'Stephen Curry',
     selectedPlayers: ['Stephen Curry'],
+    selectedTeams: [],
     startYear: 2004,
     endYear: 2024,
     viewMode: 'evolution',
+    filters: {
+        playoffOnly: false,
+        winningTeams: false
+    },
     isPlaying: false,
-    animationFrame: null
+    animationFrame: null,
+    availablePlayers: [],
+    availableTeams: []
 };
 
 // Scene configurations
@@ -163,12 +171,28 @@ async function loadAllData() {
         
         state.data = { scene1, scene2, scene3, scene4 };
         
+        // Initialize available players and teams
+        initializeSearchData();
+        
         // Enhance data with additional calculations
         enhanceDataWithCalculations();
         
     } catch (error) {
         throw new Error('Failed to load data files: ' + error.message);
     }
+}
+
+function initializeSearchData() {
+    // Extract all available players from scene3 and scene4 data
+    const playersFromScene3 = state.data.scene3.map(p => p.player);
+    const additionalPlayers = state.data.scene4.additional_players ? 
+        state.data.scene4.additional_players.map(p => p.player) : [];
+    
+    state.availablePlayers = [...new Set([...playersFromScene3, ...additionalPlayers])].sort();
+    
+    // Extract teams from scene4 data
+    state.availableTeams = state.data.scene4.team_data ? 
+        state.data.scene4.team_data.map(t => t.team).sort() : [];
 }
 
 function enhanceDataWithCalculations() {
@@ -220,11 +244,19 @@ function initializeEventListeners() {
     document.getElementById('prev-btn').addEventListener('click', () => changeScene(state.currentScene - 1));
     document.getElementById('next-btn').addEventListener('click', () => changeScene(state.currentScene + 1));
     
-    // Explorer controls
-    document.getElementById('player-select').addEventListener('change', (e) => {
-        state.selectedPlayer = e.target.value;
-        if (state.currentScene === 4) updateExplorerVisualization();
+    // Analysis type toggle
+    document.querySelectorAll('.analysis-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.analysis-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            state.analysisType = e.target.dataset.type;
+            toggleAnalysisControls();
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
     });
+
+    // Search functionality
+    initializeSearchControls();
     
     // Year sliders
     document.getElementById('start-year').addEventListener('input', (e) => {
@@ -245,8 +277,20 @@ function initializeEventListeners() {
             document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             state.viewMode = e.target.dataset.view;
+            updateChartTitle();
             if (state.currentScene === 4) updateExplorerVisualization();
         });
+    });
+
+    // Filter controls
+    document.getElementById('playoff-only').addEventListener('change', (e) => {
+        state.filters.playoffOnly = e.target.checked;
+        if (state.currentScene === 4) updateExplorerVisualization();
+    });
+    
+    document.getElementById('winning-teams').addEventListener('change', (e) => {
+        state.filters.winningTeams = e.target.checked;
+        if (state.currentScene === 4) updateExplorerVisualization();
     });
     
     // Timeline play button
@@ -1058,21 +1102,45 @@ function updateExplorerVisualization() {
     
     switch (state.viewMode) {
         case 'evolution':
-            drawPlayerEvolution(g, width, height);
+            if (state.analysisType === 'players') {
+                drawPlayerEvolution(g, width, height);
+            } else {
+                drawTeamEvolution(g, width, height);
+            }
             break;
         case 'comparison':
-            drawPlayerComparison(g, width, height);
+            if (state.analysisType === 'players') {
+                drawPlayerComparison(g, width, height);
+            } else {
+                drawTeamComparison(g, width, height);
+            }
             break;
         case 'heatmap':
             drawShotHeatmap(g, width, height);
             break;
+        case 'performance':
+            drawPerformanceDashboard(g, width, height);
+            break;
     }
     
-    updatePlayerStats();
+    updateEntityStats();
+    updatePerformanceMetrics();
 }
 
 function drawPlayerEvolution(g, width, height) {
-    const playerData = state.data.scene3.find(p => p.player === state.selectedPlayer);
+    if (state.selectedPlayers.length === 0) {
+        g.append('text')
+            .attr('x', width / 2)
+            .attr('y', height / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('fill', CONFIG.colors.gray)
+            .text('Select a player to view evolution');
+        return;
+    }
+
+    const player = state.selectedPlayers[0];
+    const playerData = getAllPlayerData().find(p => p.player === player);
     if (!playerData) return;
     
     const filteredSeasons = playerData.seasons.filter(s => 
@@ -1151,7 +1219,7 @@ function drawPlayerEvolution(g, width, height) {
         .style('cursor', 'pointer')
         .on('mouseover', function(event, d) {
             utils.showTooltip(event, `
-                <strong>${state.selectedPlayer} - ${d.season}</strong><br/>
+                <strong>${player} - ${d.season}</strong><br/>
                 3-Point Rate: ${d.three_pt_rate.toFixed(1)}%<br/>
                 3-Point Attempts: ${d.three_pt_shots}<br/>
                 Made 3-Pointers: ${d.made_threes}<br/>
@@ -1165,17 +1233,159 @@ function drawPlayerEvolution(g, width, height) {
         .attr('class', 'chart-title')
         .attr('x', width / 2)
         .attr('y', -20)
-        .text(`${state.selectedPlayer}: Shot Profile Evolution`);
+        .text(`${player}: Shot Profile Evolution`);
 }
 
 function drawPlayerComparison(g, width, height) {
-    // Implementation for player comparison view
-    g.append('text')
-        .attr('x', width / 2)
-        .attr('y', height / 2)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '18px')
-        .text('Player Comparison View - Coming Soon');
+    if (state.selectedPlayers.length < 2) {
+        g.append('text')
+            .attr('x', width / 2)
+            .attr('y', height / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('fill', CONFIG.colors.gray)
+            .text('Select 2+ players to compare');
+        return;
+    }
+
+    const players = state.selectedPlayers.slice(0, 4); // Limit to 4 players for readability
+    const playerDataList = players.map(player => 
+        getAllPlayerData().find(p => p.player === player)
+    ).filter(Boolean);
+
+    if (playerDataList.length === 0) return;
+
+    // Calculate comparison metrics
+    const metrics = playerDataList.map(playerData => {
+        const filteredSeasons = playerData.seasons.filter(s => 
+            s.season >= state.startYear && s.season <= state.endYear
+        );
+        
+        if (filteredSeasons.length === 0) return null;
+        
+        const totalAttempts = filteredSeasons.reduce((sum, s) => sum + s.three_pt_shots, 0);
+        const totalMade = filteredSeasons.reduce((sum, s) => sum + s.made_threes, 0);
+        const avgRate = filteredSeasons.reduce((sum, s) => sum + s.three_pt_rate, 0) / filteredSeasons.length;
+        const accuracy = (totalMade / totalAttempts) * 100;
+        
+        return {
+            player: playerData.player,
+            avgRate,
+            accuracy,
+            totalMade,
+            totalAttempts,
+            seasons: filteredSeasons.length
+        };
+    }).filter(Boolean);
+
+    // Create radar chart comparison
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 3;
+    
+    // Metrics to compare (normalized 0-100)
+    const categories = [
+        { name: 'Avg Rate', max: 70, key: 'avgRate' },
+        { name: 'Accuracy', max: 50, key: 'accuracy' },
+        { name: 'Volume', max: Math.max(...metrics.map(m => m.totalMade)), key: 'totalMade' },
+        { name: 'Consistency', max: 25, key: 'seasons' }
+    ];
+
+    // Draw radar chart background
+    const angleStep = (2 * Math.PI) / categories.length;
+    
+    // Draw concentric circles
+    [0.25, 0.5, 0.75, 1].forEach(factor => {
+        g.append('circle')
+            .attr('cx', centerX)
+            .attr('cy', centerY)
+            .attr('r', radius * factor)
+            .attr('fill', 'none')
+            .attr('stroke', CONFIG.colors.gray)
+            .attr('stroke-opacity', 0.3);
+    });
+
+    // Draw category lines and labels
+    categories.forEach((category, i) => {
+        const angle = i * angleStep - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        
+        g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', centerY)
+            .attr('x2', x)
+            .attr('y2', y)
+            .attr('stroke', CONFIG.colors.gray)
+            .attr('stroke-opacity', 0.3);
+            
+        g.append('text')
+            .attr('x', centerX + Math.cos(angle) * (radius + 20))
+            .attr('y', centerY + Math.sin(angle) * (radius + 20))
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', '600')
+            .text(category.name);
+    });
+
+    // Draw player data
+    const colors = [CONFIG.colors.threePt, CONFIG.colors.midRange, CONFIG.colors.efficiency, CONFIG.colors.accent];
+    
+    metrics.forEach((metric, playerIndex) => {
+        const points = categories.map((category, i) => {
+            const angle = i * angleStep - Math.PI / 2;
+            const normalizedValue = Math.min(metric[category.key] / category.max, 1);
+            const x = centerX + Math.cos(angle) * radius * normalizedValue;
+            const y = centerY + Math.sin(angle) * radius * normalizedValue;
+            return [x, y];
+        });
+
+        // Close the shape
+        points.push(points[0]);
+        
+        const lineGenerator = d3.line();
+        
+        g.append('path')
+            .datum(points)
+            .attr('d', lineGenerator)
+            .attr('fill', colors[playerIndex])
+            .attr('fill-opacity', 0.2)
+            .attr('stroke', colors[playerIndex])
+            .attr('stroke-width', 3);
+
+        // Add points
+        points.slice(0, -1).forEach(point => {
+            g.append('circle')
+                .attr('cx', point[0])
+                .attr('cy', point[1])
+                .attr('r', 4)
+                .attr('fill', colors[playerIndex])
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2);
+        });
+    });
+
+    // Add legend
+    const legend = g.append('g')
+        .attr('transform', `translate(${width - 150}, 20)`);
+        
+    metrics.forEach((metric, i) => {
+        const legendItem = legend.append('g')
+            .attr('transform', `translate(0, ${i * 25})`);
+            
+        legendItem.append('rect')
+            .attr('width', 18)
+            .attr('height', 18)
+            .attr('fill', colors[i]);
+            
+        legendItem.append('text')
+            .attr('x', 25)
+            .attr('y', 13)
+            .style('font-size', '14px')
+            .style('font-weight', '500')
+            .text(metric.player);
+    });
 }
 
 function drawShotHeatmap(g, width, height) {
@@ -1188,9 +1398,154 @@ function drawShotHeatmap(g, width, height) {
         .text('Shot Distribution Heatmap - Coming Soon');
 }
 
-function updatePlayerStats() {
-    const playerData = state.data.scene3.find(p => p.player === state.selectedPlayer);
-    if (!playerData) return;
+// Enhanced search controls
+function initializeSearchControls() {
+    const playerSearch = document.getElementById('player-search');
+    const teamSearch = document.getElementById('team-search');
+    const playerDropdown = document.getElementById('player-dropdown');
+    const teamDropdown = document.getElementById('team-dropdown');
+
+    // Player search
+    playerSearch.addEventListener('input', (e) => {
+        showSearchResults(e.target.value, state.availablePlayers, playerDropdown, 'player');
+    });
+
+    // Team search  
+    teamSearch.addEventListener('input', (e) => {
+        showSearchResults(e.target.value, state.availableTeams, teamDropdown, 'team');
+    });
+
+    // Hide dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            playerDropdown.classList.remove('show');
+            teamDropdown.classList.remove('show');
+        }
+    });
+}
+
+function showSearchResults(query, items, dropdown, type) {
+    if (query.length < 1) {
+        dropdown.classList.remove('show');
+        return;
+    }
+
+    const filtered = items.filter(item => 
+        item.toLowerCase().includes(query.toLowerCase())
+    );
+
+    dropdown.innerHTML = '';
+    if (filtered.length > 0) {
+        filtered.slice(0, 10).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.textContent = item;
+            div.addEventListener('click', () => selectItem(item, type));
+            dropdown.appendChild(div);
+        });
+        dropdown.classList.add('show');
+    } else {
+        dropdown.classList.remove('show');
+    }
+}
+
+function selectItem(item, type) {
+    if (type === 'player') {
+        if (!state.selectedPlayers.includes(item)) {
+            state.selectedPlayers.push(item);
+            updateSelectedItems('players');
+        }
+        document.getElementById('player-search').value = '';
+        document.getElementById('player-dropdown').classList.remove('show');
+    } else {
+        if (!state.selectedTeams.includes(item)) {
+            state.selectedTeams.push(item);
+            updateSelectedItems('teams');
+        }
+        document.getElementById('team-search').value = '';
+        document.getElementById('team-dropdown').classList.remove('show');
+    }
+    
+    if (state.currentScene === 4) updateExplorerVisualization();
+}
+
+function updateSelectedItems(type) {
+    const container = type === 'players' ? 
+        document.getElementById('selected-players') : 
+        document.getElementById('selected-teams');
+    const items = type === 'players' ? state.selectedPlayers : state.selectedTeams;
+    
+    container.innerHTML = '';
+    items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'selected-item';
+        div.dataset[type.slice(0, -1)] = item;
+        div.innerHTML = `
+            <span>${item}</span>
+            <button class="remove-btn" onclick="removeItem('${item}', '${type}')">×</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function removeItem(item, type) {
+    if (type === 'players') {
+        state.selectedPlayers = state.selectedPlayers.filter(p => p !== item);
+        updateSelectedItems('players');
+    } else {
+        state.selectedTeams = state.selectedTeams.filter(t => t !== item);
+        updateSelectedItems('teams');
+    }
+    
+    if (state.currentScene === 4) updateExplorerVisualization();
+}
+
+function toggleAnalysisControls() {
+    const playerControls = document.getElementById('player-controls');
+    const teamControls = document.getElementById('team-controls');
+    
+    if (state.analysisType === 'players') {
+        playerControls.style.display = 'block';
+        teamControls.style.display = 'none';
+    } else {
+        playerControls.style.display = 'none';
+        teamControls.style.display = 'block';
+    }
+}
+
+function updateChartTitle() {
+    const title = document.getElementById('chart-title');
+    const analysisType = state.analysisType === 'players' ? 'Player' : 'Team';
+    const viewMode = state.viewMode.charAt(0).toUpperCase() + state.viewMode.slice(1);
+    title.textContent = `${analysisType} ${viewMode} Analysis`;
+}
+
+function updateEntityStats() {
+    const statsTitle = document.getElementById('stats-title');
+    const statsContainer = document.getElementById('entity-stats');
+    
+    if (state.analysisType === 'players') {
+        statsTitle.textContent = 'Player Statistics';
+        updatePlayerStats(statsContainer);
+    } else {
+        statsTitle.textContent = 'Team Statistics';
+        updateTeamStats(statsContainer);
+    }
+}
+
+function updatePlayerStats(container) {
+    if (state.selectedPlayers.length === 0) {
+        container.innerHTML = '<p>No players selected</p>';
+        return;
+    }
+
+    const player = state.selectedPlayers[0]; // Show stats for first selected player
+    const playerData = getAllPlayerData().find(p => p.player === player);
+    
+    if (!playerData) {
+        container.innerHTML = '<p>Player data not found</p>';
+        return;
+    }
     
     const stats = playerData.seasons;
     const careerStats = {
@@ -1203,16 +1558,154 @@ function updatePlayerStats() {
     
     const accuracy = ((careerStats.totalThrees / careerStats.totalAttempts) * 100).toFixed(1);
     
-    document.getElementById('player-stats').innerHTML = `
+    container.innerHTML = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+            <div><strong>Player:</strong> ${player}</div>
             <div><strong>Seasons:</strong> ${careerStats.totalSeasons}</div>
             <div><strong>Made 3s:</strong> ${careerStats.totalThrees}</div>
             <div><strong>Attempts:</strong> ${careerStats.totalAttempts}</div>
             <div><strong>Accuracy:</strong> ${accuracy}%</div>
             <div><strong>Avg Rate:</strong> ${careerStats.avgRate}%</div>
             <div><strong>Peak Rate:</strong> ${careerStats.peakRate}%</div>
+            <div><strong>Years:</strong> ${Math.min(...stats.map(s => s.season))}-${Math.max(...stats.map(s => s.season))}</div>
         </div>
     `;
+}
+
+function updateTeamStats(container) {
+    if (state.selectedTeams.length === 0) {
+        container.innerHTML = '<p>No teams selected</p>';
+        return;
+    }
+
+    const team = state.selectedTeams[0]; // Show stats for first selected team
+    const teamData = state.data.scene4.team_data?.find(t => t.team === team);
+    
+    if (!teamData) {
+        container.innerHTML = '<p>Team data not found</p>';
+        return;
+    }
+    
+    const stats = teamData.seasons;
+    const teamStats = {
+        totalSeasons: stats.length,
+        avgRate: (stats.reduce((sum, s) => sum + s.three_pt_rate, 0) / stats.length).toFixed(1),
+        peakRate: Math.max(...stats.map(s => s.three_pt_rate)).toFixed(1),
+        totalWins: stats.reduce((sum, s) => sum + s.wins, 0),
+        playoffSeasons: stats.filter(s => s.playoffs).length,
+        avgWins: (stats.reduce((sum, s) => sum + s.wins, 0) / stats.length).toFixed(1)
+    };
+    
+    container.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+            <div><strong>Team:</strong> ${team}</div>
+            <div><strong>Seasons:</strong> ${teamStats.totalSeasons}</div>
+            <div><strong>Total Wins:</strong> ${teamStats.totalWins}</div>
+            <div><strong>Avg Wins/Season:</strong> ${teamStats.avgWins}</div>
+            <div><strong>Playoff Seasons:</strong> ${teamStats.playoffSeasons}</div>
+            <div><strong>Avg 3PT Rate:</strong> ${teamStats.avgRate}%</div>
+            <div><strong>Peak 3PT Rate:</strong> ${teamStats.peakRate}%</div>
+            <div><strong>Years:</strong> ${Math.min(...stats.map(s => s.season))}-${Math.max(...stats.map(s => s.season))}</div>
+        </div>
+    `;
+}
+
+function updatePerformanceMetrics() {
+    const container = document.getElementById('performance-metrics');
+    
+    if (state.analysisType === 'players' && state.selectedPlayers.length > 0) {
+        updatePlayerPerformanceMetrics(container);
+    } else if (state.analysisType === 'teams' && state.selectedTeams.length > 0) {
+        updateTeamPerformanceMetrics(container);
+    } else {
+        container.innerHTML = '<p>Select entities to view metrics</p>';
+    }
+}
+
+function updatePlayerPerformanceMetrics(container) {
+    const player = state.selectedPlayers[0];
+    const playerData = getAllPlayerData().find(p => p.player === player);
+    
+    if (!playerData) return;
+    
+    const filteredSeasons = playerData.seasons.filter(s => 
+        s.season >= state.startYear && s.season <= state.endYear
+    );
+    
+    if (filteredSeasons.length === 0) {
+        container.innerHTML = '<p>No data for selected years</p>';
+        return;
+    }
+    
+    const totalAttempts = filteredSeasons.reduce((sum, s) => sum + s.three_pt_shots, 0);
+    const totalMade = filteredSeasons.reduce((sum, s) => sum + s.made_threes, 0);
+    const avgRate = (filteredSeasons.reduce((sum, s) => sum + s.three_pt_rate, 0) / filteredSeasons.length).toFixed(1);
+    const accuracy = ((totalMade / totalAttempts) * 100).toFixed(1);
+    
+    container.innerHTML = `
+        <div class="metric-item">
+            <span class="metric-label">Total 3PT</span>
+            <span class="metric-value">${totalMade}</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Accuracy</span>
+            <span class="metric-value">${accuracy}%</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Avg Rate</span>
+            <span class="metric-value">${avgRate}%</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Seasons</span>
+            <span class="metric-value">${filteredSeasons.length}</span>
+        </div>
+    `;
+}
+
+function updateTeamPerformanceMetrics(container) {
+    const team = state.selectedTeams[0];
+    const teamData = state.data.scene4.team_data?.find(t => t.team === team);
+    
+    if (!teamData) return;
+    
+    const filteredSeasons = teamData.seasons.filter(s => 
+        s.season >= state.startYear && s.season <= state.endYear
+    );
+    
+    if (filteredSeasons.length === 0) {
+        container.innerHTML = '<p>No data for selected years</p>';
+        return;
+    }
+    
+    const totalWins = filteredSeasons.reduce((sum, s) => sum + s.wins, 0);
+    const playoffSeasons = filteredSeasons.filter(s => s.playoffs).length;
+    const avgRate = (filteredSeasons.reduce((sum, s) => sum + s.three_pt_rate, 0) / filteredSeasons.length).toFixed(1);
+    const winPct = ((totalWins / (filteredSeasons.length * 82)) * 100).toFixed(1);
+    
+    container.innerHTML = `
+        <div class="metric-item">
+            <span class="metric-label">Total Wins</span>
+            <span class="metric-value">${totalWins}</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Win %</span>
+            <span class="metric-value">${winPct}%</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Playoffs</span>
+            <span class="metric-value">${playoffSeasons}/${filteredSeasons.length}</span>
+        </div>
+        <div class="metric-item">
+            <span class="metric-label">Avg 3PT Rate</span>
+            <span class="metric-value">${avgRate}%</span>
+        </div>
+    `;
+}
+
+function getAllPlayerData() {
+    const scene3Data = state.data.scene3 || [];
+    const additionalData = state.data.scene4.additional_players || [];
+    return [...scene3Data, ...additionalData];
 }
 
 // Timeline visualization for Scene 1
