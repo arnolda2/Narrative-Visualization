@@ -94,9 +94,41 @@
 
                     <div class="control-section" id="team-controls" style="display: none;">
                         <h3>🏟️ Team Selection</h3>
-                        <div class="search-container">
-                            <input type="text" id="team-search" class="search-input" placeholder="Search teams...">
-                            <div class="search-dropdown" id="team-dropdown"></div>
+                        <div class="conference-selector">
+                            <div class="conference-tabs">
+                                <button class="conference-tab active" data-conference="Eastern Conference">🌅 Eastern</button>
+                                <button class="conference-tab" data-conference="Western Conference">🌄 Western</button>
+                            </div>
+                            <div class="divisions-container">
+                                <div class="division-grid" id="eastern-divisions">
+                                    <div class="division-section">
+                                        <h4>Atlantic</h4>
+                                        <div class="team-list" data-division="Atlantic"></div>
+                                    </div>
+                                    <div class="division-section">
+                                        <h4>Central</h4>
+                                        <div class="team-list" data-division="Central"></div>
+                                    </div>
+                                    <div class="division-section">
+                                        <h4>Southeast</h4>
+                                        <div class="team-list" data-division="Southeast"></div>
+                                    </div>
+                                </div>
+                                <div class="division-grid" id="western-divisions" style="display: none;">
+                                    <div class="division-section">
+                                        <h4>Northwest</h4>
+                                        <div class="team-list" data-division="Northwest"></div>
+                                    </div>
+                                    <div class="division-section">
+                                        <h4>Pacific</h4>
+                                        <div class="team-list" data-division="Pacific"></div>
+                                    </div>
+                                    <div class="division-section">
+                                        <h4>Southwest</h4>
+                                        <div class="team-list" data-division="Southwest"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="selected-items" id="selected-teams"></div>
                     </div>

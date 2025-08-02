@@ -194,7 +194,71 @@ function initializeSearchData() {
     state.availableTeams = state.data.scene4.team_data ? 
         state.data.scene4.team_data.map(t => t.team).sort() : [];
     
+    // Initialize conference-based team interface
+    initializeConferenceTeamSelection();
+    
     console.log(`🏀 Initialized with ${state.availablePlayers.length} players and ${state.availableTeams.length} teams`);
+}
+
+function initializeConferenceTeamSelection() {
+    if (!state.data.scene4.team_conferences) return;
+    
+    const conferences = state.data.scene4.team_conferences;
+    
+    // Populate Eastern Conference
+    const easternDivisions = document.getElementById('eastern-divisions');
+    populateConference(easternDivisions, conferences['Eastern Conference']);
+    
+    // Populate Western Conference
+    const westernDivisions = document.getElementById('western-divisions');
+    populateConference(westernDivisions, conferences['Western Conference']);
+    
+    // Add conference tab functionality
+    document.querySelectorAll('.conference-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.conference-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const conference = e.target.dataset.conference;
+            document.getElementById('eastern-divisions').style.display = 
+                conference === 'Eastern Conference' ? 'grid' : 'none';
+            document.getElementById('western-divisions').style.display = 
+                conference === 'Western Conference' ? 'grid' : 'none';
+        });
+    });
+}
+
+function populateConference(container, divisions) {
+    Object.entries(divisions).forEach(([divisionName, teams]) => {
+        const divisionContainer = container.querySelector(`[data-division="${divisionName}"] .team-list`);
+        if (divisionContainer) {
+            divisionContainer.innerHTML = '';
+            teams.forEach(team => {
+                const teamOption = document.createElement('div');
+                teamOption.className = 'team-option';
+                teamOption.textContent = team.team;
+                teamOption.dataset.team = team.team;
+                teamOption.addEventListener('click', () => selectTeam(team.team));
+                divisionContainer.appendChild(teamOption);
+            });
+        }
+    });
+}
+
+function selectTeam(teamName) {
+    if (!state.selectedTeams.includes(teamName)) {
+        state.selectedTeams.push(teamName);
+        updateSelectedItems('teams');
+        
+        // Update visual selection
+        document.querySelectorAll('.team-option').forEach(option => {
+            if (option.dataset.team === teamName) {
+                option.classList.add('selected');
+            }
+        });
+        
+        if (state.currentScene === 4) updateExplorerVisualization();
+    }
 }
 
 function enhanceDataWithCalculations() {
@@ -482,6 +546,25 @@ function drawScene0_Overview() {
         .attr('stroke-dasharray', '2,2')
         .attr('opacity', 0.3);
     
+    // Add year labels under bars
+    g.append('text')
+        .attr('x', xScale('2004') + xScale.bandwidth() / 2)
+        .attr('y', height + 40)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '14px')
+        .style('font-weight', '600')
+        .style('fill', CONFIG.colors.dark)
+        .text('2003-2004');
+        
+    g.append('text')
+        .attr('x', xScale('2024') + xScale.bandwidth() / 2)
+        .attr('y', height + 40)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '14px')
+        .style('font-weight', '600')
+        .style('fill', CONFIG.colors.dark)
+        .text('2023-2024');
+
     // Add axis labels
     g.append('text')
         .attr('class', 'axis-label')
@@ -620,7 +703,8 @@ function drawScene1_Evolution() {
             utils.showTooltip(event, `
                 <strong>${d.season} Season</strong><br/>
                 3-Point Rate: <span style="color: ${CONFIG.colors.threePt}">${d.three_pt_rate}%</span><br/>
-                Total 3PT Attempts: ${utils.formatNumber(d.three_pt_shots)}
+                Total 3PT Attempts: ${utils.formatNumber(d.three_pt_shots)}<br/>
+                League Change: ${d.threePtChange ? (d.threePtChange > 0 ? '+' : '') + d.threePtChange.toFixed(1) + '% vs previous year' : 'First year'}
             `);
             d3.select(this).transition().duration(200).attr('r', 8);
         })
@@ -642,7 +726,8 @@ function drawScene1_Evolution() {
             utils.showTooltip(event, `
                 <strong>${d.season} Season</strong><br/>
                 Mid-Range Rate: <span style="color: ${CONFIG.colors.midRange}">${d.mid_range_rate}%</span><br/>
-                Total Mid-Range: ${utils.formatNumber(d.mid_range_shots)}
+                Total Mid-Range: ${utils.formatNumber(d.mid_range_shots)}<br/>
+                Mid-Range Decline: ${d.season > 2004 ? 'Down from ' + Math.round(35.65 - d.mid_range_rate + 35.65) + '% in 2004' : 'Baseline year'}
             `);
             d3.select(this).transition().duration(200).attr('r', 8);
         })
@@ -1250,144 +1335,129 @@ function drawPlayerComparison(g, width, height) {
         return;
     }
 
-    const players = state.selectedPlayers.slice(0, 4); // Limit to 4 players for readability
+    // Interactive multi-line comparison chart
+    const players = state.selectedPlayers.slice(0, 4);
     const playerDataList = players.map(player => 
         getAllPlayerData().find(p => p.player === player)
     ).filter(Boolean);
 
     if (playerDataList.length === 0) return;
 
-    // Calculate comparison metrics
-    const metrics = playerDataList.map(playerData => {
+    // Create scales
+    const allSeasons = [];
+    playerDataList.forEach(player => {
+        player.seasons.forEach(season => {
+            if (season.season >= state.startYear && season.season <= state.endYear) {
+                allSeasons.push(season);
+            }
+        });
+    });
+
+    const xScale = d3.scaleLinear()
+        .domain([state.startYear, state.endYear])
+        .range([0, width]);
+    
+    const yScale = d3.scaleLinear()
+        .domain([0, Math.max(60, d3.max(allSeasons, d => d.three_pt_rate))])
+        .range([height, 0]);
+
+    // Add grid and axes
+    g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0, ${height})`)
+        .call(utils.getTimeAxis(xScale, width));
+    
+    g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yScale).tickFormat(d => d + '%').tickSize(-width))
+        .selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
+
+    const colors = [CONFIG.colors.threePt, CONFIG.colors.midRange, CONFIG.colors.efficiency, CONFIG.colors.accent];
+    
+    // Draw lines for each player
+    playerDataList.forEach((playerData, index) => {
         const filteredSeasons = playerData.seasons.filter(s => 
             s.season >= state.startYear && s.season <= state.endYear
         );
-        
-        if (filteredSeasons.length === 0) return null;
-        
-        const totalAttempts = filteredSeasons.reduce((sum, s) => sum + s.three_pt_shots, 0);
-        const totalMade = filteredSeasons.reduce((sum, s) => sum + s.made_threes, 0);
-        const avgRate = filteredSeasons.reduce((sum, s) => sum + s.three_pt_rate, 0) / filteredSeasons.length;
-        const accuracy = (totalMade / totalAttempts) * 100;
-        
-        return {
-            player: playerData.player,
-            avgRate,
-            accuracy,
-            totalMade,
-            totalAttempts,
-            seasons: filteredSeasons.length
-        };
-    }).filter(Boolean);
 
-    // Create radar chart comparison
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) / 3;
-    
-    // Metrics to compare (normalized 0-100)
-    const categories = [
-        { name: 'Avg Rate', max: 70, key: 'avgRate' },
-        { name: 'Accuracy', max: 50, key: 'accuracy' },
-        { name: 'Volume', max: Math.max(...metrics.map(m => m.totalMade)), key: 'totalMade' },
-        { name: 'Consistency', max: 25, key: 'seasons' }
-    ];
+        const line = d3.line()
+            .x(d => xScale(d.season))
+            .y(d => yScale(d.three_pt_rate))
+            .curve(d3.curveMonotoneX);
 
-    // Draw radar chart background
-    const angleStep = (2 * Math.PI) / categories.length;
-    
-    // Draw concentric circles
-    [0.25, 0.5, 0.75, 1].forEach(factor => {
-        g.append('circle')
-            .attr('cx', centerX)
-            .attr('cy', centerY)
-            .attr('r', radius * factor)
-            .attr('fill', 'none')
-            .attr('stroke', CONFIG.colors.gray)
-            .attr('stroke-opacity', 0.3);
-    });
-
-    // Draw category lines and labels
-    categories.forEach((category, i) => {
-        const angle = i * angleStep - Math.PI / 2;
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
-        
-        g.append('line')
-            .attr('x1', centerX)
-            .attr('y1', centerY)
-            .attr('x2', x)
-            .attr('y2', y)
-            .attr('stroke', CONFIG.colors.gray)
-            .attr('stroke-opacity', 0.3);
-            
-        g.append('text')
-            .attr('x', centerX + Math.cos(angle) * (radius + 20))
-            .attr('y', centerY + Math.sin(angle) * (radius + 20))
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .style('font-size', '14px')
-            .style('font-weight', '600')
-            .text(category.name);
-    });
-
-    // Draw player data
-    const colors = [CONFIG.colors.threePt, CONFIG.colors.midRange, CONFIG.colors.efficiency, CONFIG.colors.accent];
-    
-    metrics.forEach((metric, playerIndex) => {
-        const points = categories.map((category, i) => {
-            const angle = i * angleStep - Math.PI / 2;
-            const normalizedValue = Math.min(metric[category.key] / category.max, 1);
-            const x = centerX + Math.cos(angle) * radius * normalizedValue;
-            const y = centerY + Math.sin(angle) * radius * normalizedValue;
-            return [x, y];
-        });
-
-        // Close the shape
-        points.push(points[0]);
-        
-        const lineGenerator = d3.line();
-        
+        // Draw line
         g.append('path')
-            .datum(points)
-            .attr('d', lineGenerator)
-            .attr('fill', colors[playerIndex])
-            .attr('fill-opacity', 0.2)
-            .attr('stroke', colors[playerIndex])
-            .attr('stroke-width', 3);
+            .datum(filteredSeasons)
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', colors[index])
+            .attr('stroke-width', 3)
+            .style('opacity', 0.8);
 
-        // Add points
-        points.slice(0, -1).forEach(point => {
-            g.append('circle')
-                .attr('cx', point[0])
-                .attr('cy', point[1])
-                .attr('r', 4)
-                .attr('fill', colors[playerIndex])
-                .attr('stroke', 'white')
-                .attr('stroke-width', 2);
-        });
+        // Add interactive points
+        g.selectAll(`.player-points-${index}`)
+            .data(filteredSeasons)
+            .enter()
+            .append('circle')
+            .attr('class', `player-points-${index}`)
+            .attr('cx', d => xScale(d.season))
+            .attr('cy', d => yScale(d.three_pt_rate))
+            .attr('r', 5)
+            .attr('fill', colors[index])
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer')
+            .on('mouseover', function(event, d) {
+                utils.showTooltip(event, `
+                    <strong>${playerData.player} - ${d.season}</strong><br/>
+                    3-Point Rate: <span style="color: ${colors[index]}">${d.three_pt_rate}%</span><br/>
+                    Made 3-Pointers: ${d.made_threes}<br/>
+                    Shooting %: ${d.three_pt_percentage}%<br/>
+                    Total Shots: ${d.total_shots}
+                `);
+                d3.select(this).transition().duration(200).attr('r', 8);
+            })
+            .on('mouseout', function() {
+                utils.hideTooltip();
+                d3.select(this).transition().duration(200).attr('r', 5);
+            });
     });
+
+    // Add title
+    g.append('text')
+        .attr('class', 'chart-title')
+        .attr('x', width / 2)
+        .attr('y', -20)
+        .text('Player Three-Point Rate Comparison');
 
     // Add legend
     const legend = g.append('g')
         .attr('transform', `translate(${width - 150}, 20)`);
         
-    metrics.forEach((metric, i) => {
+    playerDataList.forEach((playerData, i) => {
         const legendItem = legend.append('g')
             .attr('transform', `translate(0, ${i * 25})`);
             
-        legendItem.append('rect')
-            .attr('width', 18)
-            .attr('height', 18)
-            .attr('fill', colors[i]);
+        legendItem.append('line')
+            .attr('x1', 0)
+            .attr('x2', 20)
+            .attr('y1', 10)
+            .attr('y2', 10)
+            .attr('stroke', colors[i])
+            .attr('stroke-width', 3);
             
         legendItem.append('text')
             .attr('x', 25)
-            .attr('y', 13)
-            .style('font-size', '14px')
+            .attr('y', 14)
+            .style('font-size', '12px')
             .style('font-weight', '500')
-            .text(metric.player);
+            .text(playerData.player);
     });
+
+
 }
 
 function drawShotHeatmap(g, width, height) {
