@@ -1,0 +1,338 @@
+/* NBA Three-Point Revolution - Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+header {
+    text-align: center;
+    padding: 30px 0;
+    border-bottom: 3px solid #1d3557;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #1d3557;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 1.2em;
+    color: #457b9d;
+    font-style: italic;
+}
+
+#scene-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 600px;
+}
+
+#scene-text {
+    text-align: center;
+    margin-bottom: 30px;
+    max-width: 800px;
+}
+
+#scene-title {
+    font-size: 1.8em;
+    color: #1d3557;
+    margin-bottom: 15px;
+}
+
+#scene-description {
+    font-size: 1.1em;
+    color: #555;
+    line-height: 1.8;
+}
+
+#visualization-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#main-svg {
+    border: 2px solid #e9c46a;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation Styles */
+#navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.nav-btn {
+    background: #e76f51;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 111, 81, 0.3);
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #d64933;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 111, 81, 0.4);
+}
+
+.nav-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#scene-indicator {
+    background: #f1faee;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 2px solid #a8dadc;
+    font-weight: 600;
+    color: #1d3557;
+}
+
+/* Interactive Controls */
+#interactive-controls {
+    background: #f8f9fa;
+    border: 2px solid #e9c46a;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+#interactive-controls h3 {
+    color: #1d3557;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.control-group {
+    margin: 15px 0;
+}
+
+.control-group label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: 600;
+    color: #555;
+}
+
+#player-select {
+    padding: 8px 15px;
+    border: 2px solid #a8dadc;
+    border-radius: 5px;
+    font-size: 1em;
+    background: white;
+    color: #333;
+    cursor: pointer;
+}
+
+#player-select:focus {
+    outline: none;
+    border-color: #457b9d;
+    box-shadow: 0 0 5px rgba(69, 123, 157, 0.3);
+}
+
+/* Chart Styles */
+.axis-label {
+    font-size: 14px;
+    font-weight: 600;
+    fill: #1d3557;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 700;
+    fill: #1d3557;
+    text-anchor: middle;
+}
+
+.three-pt-line {
+    stroke: #e76f51;
+    stroke-width: 3;
+    fill: none;
+}
+
+.mid-range-line {
+    stroke: #457b9d;
+    stroke-width: 3;
+    fill: none;
+}
+
+.efficiency-line {
+    stroke: #2a9d8f;
+    stroke-width: 3;
+    fill: none;
+}
+
+.line-point {
+    r: 4;
+    stroke-width: 2;
+    stroke: white;
+}
+
+.three-pt-point {
+    fill: #e76f51;
+}
+
+.mid-range-point {
+    fill: #457b9d;
+}
+
+.efficiency-point {
+    fill: #2a9d8f;
+}
+
+.bar-three-pt {
+    fill: #e76f51;
+    stroke: #d64933;
+    stroke-width: 1;
+}
+
+.bar-mid-range {
+    fill: #457b9d;
+    stroke: #3a6b8c;
+    stroke-width: 1;
+}
+
+.axis {
+    font-size: 12px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #666;
+    shape-rendering: crispEdges;
+}
+
+.grid line {
+    stroke: #e0e0e0;
+    stroke-dasharray: 2,2;
+}
+
+/* Annotation Styles */
+.annotation-note {
+    fill: #1d3557;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.annotation-note-title {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.annotation path {
+    stroke: #1d3557;
+    stroke-width: 2;
+    fill: none;
+}
+
+.annotation-note-bg {
+    fill: rgba(255, 255, 255, 0.9);
+    stroke: #1d3557;
+    stroke-width: 1;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 2px solid #e9c46a;
+    color: #666;
+}
+
+footer a {
+    color: #457b9d;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    #main-svg {
+        width: 100%;
+        height: auto;
+    }
+    
+    #navigation {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover Effects for Interactive Elements */
+.interactive-element:hover {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+}
