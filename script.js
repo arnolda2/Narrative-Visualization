@@ -183,16 +183,18 @@ async function loadAllData() {
 }
 
 function initializeSearchData() {
-    // Extract all available players from scene3 and scene4 data
+    // Extract all available players from comprehensive data
     const playersFromScene3 = state.data.scene3.map(p => p.player);
-    const additionalPlayers = state.data.scene4.additional_players ? 
-        state.data.scene4.additional_players.map(p => p.player) : [];
+    const comprehensivePlayers = state.data.scene4.player_data ? 
+        state.data.scene4.player_data.map(p => p.player) : [];
     
-    state.availablePlayers = [...new Set([...playersFromScene3, ...additionalPlayers])].sort();
+    state.availablePlayers = [...new Set([...playersFromScene3, ...comprehensivePlayers])].sort();
     
-    // Extract teams from scene4 data
+    // Extract teams from comprehensive data
     state.availableTeams = state.data.scene4.team_data ? 
         state.data.scene4.team_data.map(t => t.team).sort() : [];
+    
+    console.log(`🏀 Initialized with ${state.availablePlayers.length} players and ${state.availableTeams.length} teams`);
 }
 
 function enhanceDataWithCalculations() {
@@ -1668,32 +1670,41 @@ function updateTeamPerformanceMetrics(container) {
     
     if (!teamData) return;
     
-    const filteredSeasons = teamData.seasons.filter(s => 
+    let filteredSeasons = teamData.seasons.filter(s => 
         s.season >= state.startYear && s.season <= state.endYear
     );
     
+    // Apply filters
+    if (state.filters.playoffOnly) {
+        filteredSeasons = filteredSeasons.filter(s => s.playoffs);
+    }
+    if (state.filters.winningTeams) {
+        filteredSeasons = filteredSeasons.filter(s => s.wins >= 41);
+    }
+    
     if (filteredSeasons.length === 0) {
-        container.innerHTML = '<p>No data for selected years</p>';
+        container.innerHTML = '<p>No data for selected years/filters</p>';
         return;
     }
     
-    const totalWins = filteredSeasons.reduce((sum, s) => sum + s.wins, 0);
-    const playoffSeasons = filteredSeasons.filter(s => s.playoffs).length;
+    const totalShots = filteredSeasons.reduce((sum, s) => sum + s.total_shots, 0);
+    const totalThreeAttempts = filteredSeasons.reduce((sum, s) => sum + s.three_pt_shots, 0);
+    const totalThreeMade = filteredSeasons.reduce((sum, s) => sum + s.three_pt_made, 0);
     const avgRate = (filteredSeasons.reduce((sum, s) => sum + s.three_pt_rate, 0) / filteredSeasons.length).toFixed(1);
-    const winPct = ((totalWins / (filteredSeasons.length * 82)) * 100).toFixed(1);
+    const threePointAccuracy = totalThreeAttempts > 0 ? ((totalThreeMade / totalThreeAttempts) * 100).toFixed(1) : '0.0';
     
     container.innerHTML = `
         <div class="metric-item">
-            <span class="metric-label">Total Wins</span>
-            <span class="metric-value">${totalWins}</span>
+            <span class="metric-label">Total Shots</span>
+            <span class="metric-value">${totalShots.toLocaleString()}</span>
         </div>
         <div class="metric-item">
-            <span class="metric-label">Win %</span>
-            <span class="metric-value">${winPct}%</span>
+            <span class="metric-label">3PT Made</span>
+            <span class="metric-value">${totalThreeMade.toLocaleString()}</span>
         </div>
         <div class="metric-item">
-            <span class="metric-label">Playoffs</span>
-            <span class="metric-value">${playoffSeasons}/${filteredSeasons.length}</span>
+            <span class="metric-label">3PT Accuracy</span>
+            <span class="metric-value">${threePointAccuracy}%</span>
         </div>
         <div class="metric-item">
             <span class="metric-label">Avg 3PT Rate</span>
@@ -1704,8 +1715,8 @@ function updateTeamPerformanceMetrics(container) {
 
 function getAllPlayerData() {
     const scene3Data = state.data.scene3 || [];
-    const additionalData = state.data.scene4.additional_players || [];
-    return [...scene3Data, ...additionalData];
+    const comprehensiveData = state.data.scene4.player_data || [];
+    return [...scene3Data, ...comprehensiveData];
 }
 
 // Timeline visualization for Scene 1
