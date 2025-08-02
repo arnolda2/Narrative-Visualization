@@ -18,7 +18,7 @@
 
 6. **Access Your Live Site**: Once deployed, your visualization will be available at:
    ```
-   https://[your-username].github.io/Narrative-Visualization/
+   https://arnolda2.github.io/Narrative-Visualization/
    ```
 
 ## Verification Steps

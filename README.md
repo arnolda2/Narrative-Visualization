@@ -40,7 +40,7 @@ Built using the **Martini Glass** narrative structure:
 
 ## 🚀 Live Demo
 
-Visit the live visualization: [https://arnoldancheril.github.io/Narrative-Visualization/](https://arnoldancheril.github.io/Narrative-Visualization/)
+Visit the live visualization: [https://arnolda2.github.io/Narrative-Visualization/](https://arnolda2.github.io/Narrative-Visualization/)
 
 ## 📝 Data Source
 
