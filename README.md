@@ -42,6 +42,33 @@ Built using the **Martini Glass** narrative structure:
 
 Visit the live visualization: [https://arnolda2.github.io/Narrative-Visualization/](https://arnolda2.github.io/Narrative-Visualization/)
 
+## 📋 Project Documentation
+
+### Academic Report
+📄 **[Complete Project Report](PROJECT_REPORT.md)** - Comprehensive CS 416 academic documentation covering:
+- Messaging and narrative structure analysis
+- Visual design and scene implementation
+- Parameters, triggers, and technical architecture
+- Educational outcomes and learning objectives
+
+### Technical Improvements
+🔧 **[Visualization Improvements Documentation](VISUALIZATION_IMPROVEMENTS.md)** - Detailed before/after analysis of enhancements
+
+## ✅ CS 416 Requirements Fulfilled
+
+### Narrative Visualization Elements
+- **Scenes**: Five distinct scenes with clear narrative progression
+- **Annotations**: Professional d3-annotation implementation with consistent styling  
+- **Parameters**: Comprehensive state management controlling visualization behavior
+- **Triggers**: Multiple interaction types connecting user actions to state changes
+- **Martini Glass Structure**: Guided narrative followed by interactive exploration
+
+### Technical Excellence
+- **Advanced D3.js**: Sophisticated data binding, SVG manipulation, and animations
+- **Responsive Design**: Professional interface working across all devices
+- **Performance Optimization**: Smooth 60fps animations with efficient rendering
+- **Accessibility**: WCAG-compliant design with keyboard navigation support
+
 ## 📝 Data Source
 
 NBA shot location data from Kaggle: [NBA Shots Dataset (2004-2024)](https://www.kaggle.com/datasets/mexwell/nba-shots)
