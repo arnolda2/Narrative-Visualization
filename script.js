@@ -1,180 +1,385 @@
-// NBA Three-Point Revolution - Main JavaScript File
-// Narrative Visualization using D3.js with Martini Glass Structure
+// NBA Three-Point Revolution - Enhanced Interactive Dashboard
+// Modern JavaScript with D3.js for comprehensive basketball analytics
 
-// Global state and configuration
+// Global configuration and state
+const CONFIG = {
+    // Responsive dimensions
+    width: 1000,
+    height: 600,
+    margin: { top: 60, right: 80, bottom: 80, left: 80 },
+    
+    // Animation settings
+    transitionDuration: 1000,
+    delayBetweenElements: 50,
+    
+    // Colors (matching CSS variables)
+    colors: {
+        threePt: '#ea580c',
+        midRange: '#1e40af', 
+        efficiency: '#16a34a',
+        accent: '#f59e0b',
+        dark: '#0f172a',
+        gray: '#64748b',
+        background: '#f8fafc'
+    }
+};
+
+// Global state management
 let state = {
     currentScene: 0,
     totalScenes: 5,
     data: {},
-    selectedPlayer: 'Stephen Curry'
+    selectedPlayer: 'Stephen Curry',
+    selectedPlayers: ['Stephen Curry'],
+    startYear: 2004,
+    endYear: 2024,
+    viewMode: 'evolution',
+    isPlaying: false,
+    animationFrame: null
 };
 
 // Scene configurations
 const scenes = [
     {
-        title: "Then vs Now",
-        description: "In 2004, NBA teams took roughly 1 in 5 shots from three-point range. By 2024, that number nearly doubled to 2 in 5 shots. Mid-range shots, once a staple of the game, have dramatically declined."
+        title: "The Great Transformation",
+        subtitle: "From mid-range masters to three-point revolutionaries - see how basketball fundamentally changed",
+        content: "In 2004, NBA teams took just 18.7% of their shots from beyond the arc. By 2024, that number skyrocketed to 39.5% - more than doubling in just two decades."
     },
     {
-        title: "The Rising Arc",
-        description: "The league-wide shift toward three-pointers didn't happen overnight. This chart shows how the three-point attempt rate steadily climbed over two decades, fundamentally changing how basketball is played."
+        title: "Evolution Timeline", 
+        subtitle: "Watch the three-point revolution unfold year by year across the entire league",
+        content: "The transformation wasn't overnight - it was a steady evolution driven by analytics, strategy, and revolutionary players who changed the game forever."
     },
     {
         title: "Revolutionary Players",
-        description: "While the entire league embraced the three-pointer, certain players led this revolution. Stephen Curry's record-breaking 2015-16 season (402 made threes) exemplified this new era of basketball."
+        subtitle: "Meet the sharpshooters who led the charge and redefined basketball",
+        content: "Stephen Curry's record-breaking 402 made threes in 2015-16 wasn't just a record - it was a statement that changed how every team approaches offense."
     },
     {
-        title: "The Efficiency Payoff",
-        description: "Why did teams make this shift? The answer lies in scoring efficiency. As teams replaced mid-range shots with three-pointers, the league's overall effective field goal percentage reached historic highs."
+        title: "The Efficiency Revolution", 
+        subtitle: "Why teams embraced the three-pointer: it's simply more effective",
+        content: "As teams shifted from mid-range to three-point shots, league-wide scoring efficiency reached historic highs. The math is simple: 3 > 2."
     },
     {
-        title: "Explore the Revolution",
-        description: "Now it's your turn to explore the data. Select different players to see how their shot profiles evolved throughout this three-point revolution."
+        title: "Interactive Explorer",
+        subtitle: "Dive deep into the data - explore players, compare eras, and discover insights",
+        content: "Now it's your turn to explore. Select players, adjust time ranges, and discover the stories hidden in 4.2 million shots."
     }
 ];
 
-// D3 margins and dimensions
-const margin = { top: 60, right: 80, bottom: 80, left: 80 };
-const width = 800 - margin.left - margin.right;
-const height = 500 - margin.top - margin.bottom;
-
-// Color scheme
-const colors = {
-    threePt: '#e76f51',
-    midRange: '#457b9d',
-    efficiency: '#2a9d8f',
-    background: '#f8f9fa',
-    text: '#1d3557'
+// Utility functions
+const utils = {
+    // Responsive SVG setup
+    setupSVG: function(selector, width = CONFIG.width, height = CONFIG.height) {
+        d3.select(selector).selectAll("*").remove();
+        
+        const container = d3.select(selector);
+        const containerRect = container.node().getBoundingClientRect();
+        const aspectRatio = width / height;
+        
+        // Responsive width calculation
+        const responsiveWidth = Math.min(width, containerRect.width - 40);
+        const responsiveHeight = responsiveWidth / aspectRatio;
+        
+        const svg = container
+            .attr('width', responsiveWidth)
+            .attr('height', responsiveHeight)
+            .attr('viewBox', `0 0 ${width} ${height}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+            
+        const g = svg.append('g')
+            .attr('transform', `translate(${CONFIG.margin.left}, ${CONFIG.margin.top})`);
+            
+        return { svg, g, width: width - CONFIG.margin.left - CONFIG.margin.right, 
+                height: height - CONFIG.margin.top - CONFIG.margin.bottom };
+    },
+    
+    // Smart axis formatting to prevent overcrowding
+    getTimeAxis: function(xScale, width) {
+        const domain = xScale.domain();
+        const range = domain[1] - domain[0];
+        
+        let tickInterval;
+        if (range <= 5) tickInterval = 1;
+        else if (range <= 10) tickInterval = 2;
+        else if (range <= 20) tickInterval = 4;
+        else tickInterval = 5;
+        
+        const ticks = [];
+        for (let year = Math.ceil(domain[0] / tickInterval) * tickInterval; year <= domain[1]; year += tickInterval) {
+            ticks.push(year);
+        }
+        
+        return d3.axisBottom(xScale)
+            .tickValues(ticks)
+            .tickFormat(d3.format('d'));
+    },
+    
+    // Enhanced tooltip
+    showTooltip: function(event, content) {
+        const tooltip = d3.select('#tooltip');
+        tooltip.html(content)
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY - 10) + 'px')
+            .classed('show', true);
+    },
+    
+    hideTooltip: function() {
+        d3.select('#tooltip').classed('show', false);
+    },
+    
+    // Format large numbers
+    formatNumber: function(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
 };
 
-// Initialize the visualization when the page loads
+// Initialize application
 document.addEventListener('DOMContentLoaded', async function() {
+    showLoading();
+    
     try {
-        // Load all data files
-        state.data = await loadAllData();
-        
-        // Initialize the first scene
+        await loadAllData();
+        initializeEventListeners();
         updateScene();
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        console.log('NBA Three-Point Revolution visualization loaded successfully!');
+        hideLoading();
     } catch (error) {
-        console.error('Error loading visualization:', error);
-        showError('Failed to load data. Please check your connection and try again.');
+        console.error('Failed to load application:', error);
+        showError('Failed to load NBA data. Please refresh the page.');
     }
 });
 
-// Load all data files
+// Data loading
 async function loadAllData() {
-    const [scene1, scene2, scene3, scene4] = await Promise.all([
-        d3.json('data/scene1_data.json'),
-        d3.json('data/scene2_data.json'),
-        d3.json('data/scene3_data.json'),
-        d3.json('data/scene4_data.json')
-    ]);
-    
-    return {
-        scene1,
-        scene2,
-        scene3,
-        scene4
-    };
+    try {
+        const [scene1, scene2, scene3, scene4] = await Promise.all([
+            d3.json('data/scene1_data.json'),
+            d3.json('data/scene2_data.json'), 
+            d3.json('data/scene3_data.json'),
+            d3.json('data/scene4_data.json')
+        ]);
+        
+        state.data = { scene1, scene2, scene3, scene4 };
+        
+        // Enhance data with additional calculations
+        enhanceDataWithCalculations();
+        
+    } catch (error) {
+        throw new Error('Failed to load data files: ' + error.message);
+    }
 }
 
-// Set up event listeners for navigation
-function setupEventListeners() {
-    document.getElementById('prev-btn').addEventListener('click', () => changeScene(-1));
-    document.getElementById('next-btn').addEventListener('click', () => changeScene(1));
+function enhanceDataWithCalculations() {
+    // Add trend calculations, player rankings, etc.
+    const leagueData = state.data.scene2;
+    
+    // Calculate year-over-year changes
+    leagueData.forEach((d, i) => {
+        if (i > 0) {
+            d.threePtChange = d.three_pt_rate - leagueData[i-1].three_pt_rate;
+            d.efficiencyChange = d.efg_percentage - leagueData[i-1].efg_percentage;
+        } else {
+            d.threePtChange = 0;
+            d.efficiencyChange = 0;
+        }
+    });
+    
+    // Enhance player data
+    state.data.scene3.forEach(player => {
+        player.seasons.forEach((season, i) => {
+            if (i > 0) {
+                season.careerProgression = season.three_pt_rate - player.seasons[0].three_pt_rate;
+            } else {
+                season.careerProgression = 0;
+            }
+        });
+    });
+}
+
+// Event listeners
+function initializeEventListeners() {
+    // Scene navigation
+    document.querySelectorAll('.nav-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            const scene = parseInt(e.target.dataset.scene);
+            changeScene(scene);
+        });
+    });
+    
+    // Progress dots
+    document.querySelectorAll('.dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const scene = parseInt(e.target.dataset.scene);
+            changeScene(scene);
+        });
+    });
+    
+    // Navigation buttons
+    document.getElementById('prev-btn').addEventListener('click', () => changeScene(state.currentScene - 1));
+    document.getElementById('next-btn').addEventListener('click', () => changeScene(state.currentScene + 1));
+    
+    // Explorer controls
     document.getElementById('player-select').addEventListener('change', (e) => {
         state.selectedPlayer = e.target.value;
-        if (state.currentScene === 4) {
-            drawScene4(); // Redraw interactive scene with new player
+        if (state.currentScene === 4) updateExplorerVisualization();
+    });
+    
+    // Year sliders
+    document.getElementById('start-year').addEventListener('input', (e) => {
+        state.startYear = parseInt(e.target.value);
+        document.getElementById('start-year-label').textContent = state.startYear;
+        if (state.currentScene === 4) updateExplorerVisualization();
+    });
+    
+    document.getElementById('end-year').addEventListener('input', (e) => {
+        state.endYear = parseInt(e.target.value);
+        document.getElementById('end-year-label').textContent = state.endYear;
+        if (state.currentScene === 4) updateExplorerVisualization();
+    });
+    
+    // View toggles
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            state.viewMode = e.target.dataset.view;
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
+    });
+    
+    // Timeline play button
+    document.getElementById('play-btn').addEventListener('click', toggleTimelineAnimation);
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && state.currentScene > 0) {
+            changeScene(state.currentScene - 1);
+        } else if (e.key === 'ArrowRight' && state.currentScene < state.totalScenes - 1) {
+            changeScene(state.currentScene + 1);
         }
     });
 }
 
-// Change scene function
-function changeScene(direction) {
-    const newScene = state.currentScene + direction;
+// Scene management
+function changeScene(newScene) {
+    if (newScene < 0 || newScene >= state.totalScenes || newScene === state.currentScene) return;
     
-    if (newScene >= 0 && newScene < state.totalScenes) {
-        state.currentScene = newScene;
-        updateScene();
-    }
+    state.currentScene = newScene;
+    updateScene();
 }
 
-// Update scene content and visualization
 function updateScene() {
-    // Update scene text
-    document.getElementById('scene-title').textContent = scenes[state.currentScene].title;
-    document.getElementById('scene-description').textContent = scenes[state.currentScene].description;
-    document.getElementById('current-scene').textContent = state.currentScene + 1;
+    // Update navigation
+    updateNavigation();
+    
+    // Update scene content
+    updateSceneContent();
+    
+    // Hide/show appropriate elements
+    updateSceneVisibility();
+    
+    // Draw scene visualization
+    drawCurrentScene();
+}
+
+function updateNavigation() {
+    // Update nav pills
+    document.querySelectorAll('.nav-pill').forEach((pill, index) => {
+        pill.classList.toggle('active', index === state.currentScene);
+    });
+    
+    // Update progress dots
+    document.querySelectorAll('.dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === state.currentScene);
+    });
     
     // Update navigation buttons
     document.getElementById('prev-btn').disabled = state.currentScene === 0;
     document.getElementById('next-btn').disabled = state.currentScene === state.totalScenes - 1;
     
-    // Show/hide interactive controls
-    const interactiveControls = document.getElementById('interactive-controls');
-    interactiveControls.style.display = state.currentScene === 4 ? 'block' : 'none';
+    // Update scene counter
+    document.getElementById('current-scene-num').textContent = state.currentScene + 1;
+}
+
+function updateSceneContent() {
+    const scene = scenes[state.currentScene];
     
-    // Clear previous visualization
-    d3.select('#main-svg').selectAll('*').remove();
+    document.getElementById('scene-title').textContent = scene.title;
+    document.getElementById('scene-subtitle').textContent = scene.subtitle;
     
-    // Draw current scene
+    // Add fade-in animation
+    document.querySelector('.scene-description').classList.add('fade-in');
+    setTimeout(() => {
+        document.querySelector('.scene-description').classList.remove('fade-in');
+    }, 500);
+}
+
+function updateSceneVisibility() {
+    // Show/hide explorer dashboard
+    const explorerDashboard = document.getElementById('explorer-dashboard');
+    const timelineNav = document.getElementById('timeline-nav');
+    const secondaryPanels = document.getElementById('secondary-panels');
+    
+    explorerDashboard.style.display = state.currentScene === 4 ? 'block' : 'none';
+    timelineNav.style.display = state.currentScene === 1 ? 'block' : 'none';
+    
+    // Clear secondary panels
+    secondaryPanels.innerHTML = '';
+}
+
+function drawCurrentScene() {
     switch (state.currentScene) {
-        case 0:
-            drawScene0();
-            break;
-        case 1:
-            drawScene1();
-            break;
-        case 2:
-            drawScene2();
-            break;
-        case 3:
-            drawScene3();
-            break;
-        case 4:
-            drawScene4();
-            break;
+        case 0: drawScene0_Overview(); break;
+        case 1: drawScene1_Evolution(); break; 
+        case 2: drawScene2_Players(); break;
+        case 3: drawScene3_Efficiency(); break;
+        case 4: drawScene4_Explorer(); break;
     }
 }
 
-// Scene 0: 2004 vs 2024 Comparison
-function drawScene0() {
-    const svg = d3.select('#main-svg');
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
-    
+// Scene 0: Enhanced Overview with better design
+function drawScene0_Overview() {
+    const { svg, g, width, height } = utils.setupSVG('#main-visualization');
     const data = state.data.scene1;
     
-    // Create comparison data
+    // Create enhanced comparison data
     const comparisonData = [
-        { year: '2004', threePt: data['2004'].three_pt_percentage, midRange: data['2004'].mid_range_percentage },
-        { year: '2024', threePt: data['2024'].three_pt_percentage, midRange: data['2024'].mid_range_percentage }
+        { 
+            year: '2004', 
+            threePt: data['2004'].three_pt_percentage, 
+            midRange: data['2004'].mid_range_percentage,
+            total: data['2004'].total_shots
+        },
+        { 
+            year: '2024', 
+            threePt: data['2024'].three_pt_percentage, 
+            midRange: data['2024'].mid_range_percentage,
+            total: data['2024'].total_shots
+        }
     ];
     
-    // Scales
+    // Enhanced scales with better spacing
     const xScale = d3.scaleBand()
         .domain(['2004', '2024'])
         .range([0, width])
-        .padding(0.3);
+        .padding(0.4);
     
     const yScale = d3.scaleLinear()
         .domain([0, 50])
         .range([height, 0]);
     
-    // Add title
+    // Add title with better positioning
     g.append('text')
         .attr('class', 'chart-title')
         .attr('x', width / 2)
-        .attr('y', -20)
-        .text('Shot Selection: Then vs Now');
+        .attr('y', -30)
+        .style('font-size', '24px')
+        .style('font-weight', '700')
+        .text('The Three-Point Transformation');
     
-    // Create bar groups
+    // Create grouped bars with better spacing
     const barGroups = g.selectAll('.bar-group')
         .data(comparisonData)
         .enter()
@@ -183,108 +388,123 @@ function drawScene0() {
         .attr('transform', d => `translate(${xScale(d.year)}, 0)`);
     
     const barWidth = xScale.bandwidth() / 2.5;
+    const barSpacing = 8;
     
-    // Three-point bars
+    // Three-point bars with animation
     barGroups.append('rect')
         .attr('class', 'bar-three-pt')
         .attr('x', 0)
-        .attr('y', d => yScale(d.threePt))
+        .attr('y', height)
         .attr('width', barWidth)
-        .attr('height', d => height - yScale(d.threePt))
-        .append('title')
-        .text(d => `3-Point: ${d.threePt}%`);
+        .attr('height', 0)
+        .attr('rx', 4)
+        .transition()
+        .duration(CONFIG.transitionDuration)
+        .delay((d, i) => i * 200)
+        .attr('y', d => yScale(d.threePt))
+        .attr('height', d => height - yScale(d.threePt));
     
-    // Mid-range bars
+    // Mid-range bars with animation
     barGroups.append('rect')
         .attr('class', 'bar-mid-range')
-        .attr('x', barWidth + 5)
-        .attr('y', d => yScale(d.midRange))
+        .attr('x', barWidth + barSpacing)
+        .attr('y', height)
         .attr('width', barWidth)
-        .attr('height', d => height - yScale(d.midRange))
-        .append('title')
-        .text(d => `Mid-Range: ${d.midRange}%`);
+        .attr('height', 0)
+        .attr('rx', 4)
+        .transition()
+        .duration(CONFIG.transitionDuration)
+        .delay((d, i) => i * 200 + 100)
+        .attr('y', d => yScale(d.midRange))
+        .attr('height', d => height - yScale(d.midRange));
     
-    // Add value labels on bars
-    barGroups.selectAll('.bar-label')
-        .data(d => [
-            { value: d.threePt, x: barWidth/2, type: '3PT' },
-            { value: d.midRange, x: barWidth + 5 + barWidth/2, type: 'Mid' }
-        ])
-        .enter()
-        .append('text')
-        .attr('class', 'bar-label')
-        .attr('x', d => d.x)
-        .attr('y', d => yScale(d.value) - 5)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '12px')
-        .style('font-weight', 'bold')
-        .style('fill', colors.text)
-        .text(d => `${d.value}%`);
-    
-    // Add year labels
-    barGroups.append('text')
-        .attr('x', barWidth + 2.5)
-        .attr('y', height + 20)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '16px')
-        .style('font-weight', 'bold')
-        .style('fill', colors.text)
-        .text(d => d.year);
-    
-    // Add y-axis
-    g.append('g')
+    // Enhanced Y-axis with proper spacing
+    const yAxis = g.append('g')
         .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+        .style('opacity', 0)
+        .call(d3.axisLeft(yScale)
+            .tickFormat(d => d + '%')
+            .tickSize(-width)
+            .ticks(6))
+        .transition()
+        .duration(CONFIG.transitionDuration)
+        .style('opacity', 1);
     
-    // Add y-axis label
+    // Style the grid lines
+    yAxis.selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
+    
+    // Add axis labels
     g.append('text')
         .attr('class', 'axis-label')
         .attr('transform', 'rotate(-90)')
         .attr('y', -50)
         .attr('x', -height / 2)
         .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
         .text('Percentage of Total Shots');
     
-    // Add legend
+    // Enhanced legend
     const legend = g.append('g')
-        .attr('transform', `translate(${width - 150}, 30)`);
+        .attr('transform', `translate(${width - 200}, 30)`)
+        .style('opacity', 0);
     
-    legend.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('width', 15)
-        .attr('height', 15)
-        .attr('fill', colors.threePt);
+    const legendData = [
+        { label: '3-Point Shots', color: CONFIG.colors.threePt },
+        { label: 'Mid-Range Shots', color: CONFIG.colors.midRange }
+    ];
     
-    legend.append('text')
-        .attr('x', 20)
-        .attr('y', 12)
-        .style('font-size', '12px')
-        .text('3-Point Shots');
+    const legendItems = legend.selectAll('.legend-item')
+        .data(legendData)
+        .enter()
+        .append('g')
+        .attr('class', 'legend-item')
+        .attr('transform', (d, i) => `translate(0, ${i * 25})`);
     
-    legend.append('rect')
-        .attr('x', 0)
-        .attr('y', 25)
-        .attr('width', 15)
-        .attr('height', 15)
-        .attr('fill', colors.midRange);
+    legendItems.append('rect')
+        .attr('width', 18)
+        .attr('height', 18)
+        .attr('rx', 3)
+        .attr('fill', d => d.color);
     
-    legend.append('text')
-        .attr('x', 20)
-        .attr('y', 37)
-        .style('font-size', '12px')
-        .text('Mid-Range Shots');
+    legendItems.append('text')
+        .attr('x', 25)
+        .attr('y', 13)
+        .style('font-size', '14px')
+        .style('font-weight', '500')
+        .style('fill', CONFIG.colors.dark)
+        .text(d => d.label);
+    
+    legend.transition()
+        .duration(CONFIG.transitionDuration)
+        .delay(1000)
+        .style('opacity', 1);
+    
+    // Add secondary panels with insights
+    createSecondaryPanels([
+        {
+            title: "📈 Dramatic Shift",
+            content: `In just 20 years, three-point shooting more than doubled from ${data['2004'].three_pt_percentage}% to ${data['2024'].three_pt_percentage}% of all shots.`
+        },
+        {
+            title: "📉 Mid-Range Decline", 
+            content: `Mid-range shots dropped dramatically from ${data['2004'].mid_range_percentage}% to ${data['2024'].mid_range_percentage}% - a 68% decrease.`
+        },
+        {
+            title: "🏀 Total Volume",
+            content: `${utils.formatNumber(data['2024'].total_shots)} total shots analyzed in 2024 season vs ${utils.formatNumber(data['2004'].total_shots)} in 2004.`
+        }
+    ]);
 }
 
-// Scene 1: League-wide trend over time
-function drawScene1() {
-    const svg = d3.select('#main-svg');
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
-    
+// Scene 1: Enhanced Evolution Timeline with fixed x-axis
+function drawScene1_Evolution() {
+    const { svg, g, width, height } = utils.setupSVG('#main-visualization');
     const data = state.data.scene2;
     
-    // Scales
+    // Enhanced scales
     const xScale = d3.scaleLinear()
         .domain(d3.extent(data, d => d.season))
         .range([0, width]);
@@ -293,7 +513,28 @@ function drawScene1() {
         .domain([0, 45])
         .range([height, 0]);
     
-    // Line generators
+    // Add background grid with proper x-axis spacing
+    const xAxis = g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0, ${height})`)
+        .call(utils.getTimeAxis(xScale, width));
+    
+    const yAxis = g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yScale).tickFormat(d => d + '%').tickSize(-width));
+    
+    // Style grid
+    yAxis.selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
+    
+    xAxis.selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
+    
+    // Enhanced line generators
     const threePtLine = d3.line()
         .x(d => xScale(d.season))
         .y(d => yScale(d.three_pt_rate))
@@ -304,77 +545,73 @@ function drawScene1() {
         .y(d => yScale(d.mid_range_rate))
         .curve(d3.curveMonotoneX);
     
-    // Add title
-    g.append('text')
-        .attr('class', 'chart-title')
-        .attr('x', width / 2)
-        .attr('y', -20)
-        .text('League Shot Selection Trends (2004-2024)');
-    
-    // Add grid lines
-    g.append('g')
-        .attr('class', 'grid')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale)
-            .tickSize(-height)
-            .tickFormat('')
-        );
-    
-    g.append('g')
-        .attr('class', 'grid')
-        .call(d3.axisLeft(yScale)
-            .tickSize(-width)
-            .tickFormat('')
-        );
-    
-    // Draw lines
-    g.append('path')
+    // Draw lines with proper stroke width
+    const threePtPath = g.append('path')
         .datum(data)
         .attr('class', 'three-pt-line')
-        .attr('d', threePtLine);
+        .attr('d', threePtLine)
+        .style('stroke-width', 4);
     
-    g.append('path')
+    const midRangePath = g.append('path')
         .datum(data)
         .attr('class', 'mid-range-line')
-        .attr('d', midRangeLine);
+        .attr('d', midRangeLine)
+        .style('stroke-width', 4);
     
-    // Add points
-    g.selectAll('.three-pt-point')
+    // Add interactive points with better hover effects
+    const pointsGroup = g.append('g').attr('class', 'points-group');
+    
+    pointsGroup.selectAll('.three-pt-point')
         .data(data)
         .enter()
         .append('circle')
         .attr('class', 'line-point three-pt-point')
         .attr('cx', d => xScale(d.season))
         .attr('cy', d => yScale(d.three_pt_rate))
-        .append('title')
-        .text(d => `${d.season}: ${d.three_pt_rate}% 3-point shots`);
+        .attr('r', 5)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event, d) {
+            utils.showTooltip(event, `
+                <strong>${d.season} Season</strong><br/>
+                3-Point Rate: <span style="color: ${CONFIG.colors.threePt}">${d.three_pt_rate}%</span><br/>
+                Total 3PT Attempts: ${utils.formatNumber(d.three_pt_shots)}
+            `);
+            d3.select(this).transition().duration(200).attr('r', 8);
+        })
+        .on('mouseout', function() {
+            utils.hideTooltip();
+            d3.select(this).transition().duration(200).attr('r', 5);
+        });
     
-    g.selectAll('.mid-range-point')
+    pointsGroup.selectAll('.mid-range-point')
         .data(data)
         .enter()
         .append('circle')
         .attr('class', 'line-point mid-range-point')
         .attr('cx', d => xScale(d.season))
         .attr('cy', d => yScale(d.mid_range_rate))
-        .append('title')
-        .text(d => `${d.season}: ${d.mid_range_rate}% mid-range shots`);
-    
-    // Add axes
-    g.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-    
-    g.append('g')
-        .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+        .attr('r', 5)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event, d) {
+            utils.showTooltip(event, `
+                <strong>${d.season} Season</strong><br/>
+                Mid-Range Rate: <span style="color: ${CONFIG.colors.midRange}">${d.mid_range_rate}%</span><br/>
+                Total Mid-Range: ${utils.formatNumber(d.mid_range_shots)}
+            `);
+            d3.select(this).transition().duration(200).attr('r', 8);
+        })
+        .on('mouseout', function() {
+            utils.hideTooltip();
+            d3.select(this).transition().duration(200).attr('r', 5);
+        });
     
     // Add axis labels
     g.append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
-        .attr('y', height + 50)
+        .attr('y', height + 60)
         .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
         .text('Season');
     
     g.append('text')
@@ -383,78 +620,65 @@ function drawScene1() {
         .attr('y', -50)
         .attr('x', -height / 2)
         .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
         .text('Percentage of Total Shots');
     
-    // Add annotations
-    const annotations = [
-        {
-            note: {
-                title: "2004: The Old Era",
-                label: "3-pointers: 18.7%\nMid-range: 35.7%"
-            },
-            x: xScale(2004),
-            y: yScale(18.7),
-            dy: -60,
-            dx: 50
-        },
-        {
-            note: {
-                title: "2024: Three-Point Era",
-                label: "3-pointers: 39.5%\nMid-range: 11.2%"
-            },
-            x: xScale(2024),
-            y: yScale(39.5),
-            dy: -60,
-            dx: -100
-        }
+    // Enhanced legend
+    const legend = g.append('g')
+        .attr('transform', `translate(${width - 200}, 40)`);
+    
+    const legendData = [
+        { label: '3-Point Rate', color: CONFIG.colors.threePt },
+        { label: 'Mid-Range Rate', color: CONFIG.colors.midRange }
     ];
     
-    const makeAnnotations = d3.annotation()
-        .annotations(annotations);
+    const legendItems = legend.selectAll('.legend-item')
+        .data(legendData)
+        .enter()
+        .append('g')
+        .attr('class', 'legend-item')
+        .attr('transform', (d, i) => `translate(0, ${i * 30})`);
     
-    g.append('g')
-        .attr('class', 'annotation-group')
-        .call(makeAnnotations);
-    
-    // Add legend
-    const legend = g.append('g')
-        .attr('transform', `translate(${width - 150}, 30)`);
-    
-    legend.append('line')
+    legendItems.append('line')
         .attr('x1', 0)
-        .attr('x2', 20)
+        .attr('x2', 25)
         .attr('y1', 10)
         .attr('y2', 10)
-        .attr('stroke', colors.threePt)
-        .attr('stroke-width', 3);
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 4);
     
-    legend.append('text')
-        .attr('x', 25)
+    legendItems.append('text')
+        .attr('x', 35)
         .attr('y', 14)
-        .style('font-size', '12px')
-        .text('3-Point Rate');
+        .style('font-size', '14px')
+        .style('font-weight', '500')
+        .style('fill', CONFIG.colors.dark)
+        .text(d => d.label);
     
-    legend.append('line')
-        .attr('x1', 0)
-        .attr('x2', 20)
-        .attr('y1', 35)
-        .attr('y2', 35)
-        .attr('stroke', colors.midRange)
-        .attr('stroke-width', 3);
+    // Add timeline visualization
+    drawTimeline();
     
-    legend.append('text')
-        .attr('x', 25)
-        .attr('y', 39)
-        .style('font-size', '12px')
-        .text('Mid-Range Rate');
+    // Create secondary panels for this scene
+    createSecondaryPanels([
+        {
+            title: "📊 Steady Growth",
+            content: "The three-point rate grew consistently at ~1% per year, with acceleration after 2012 due to analytics adoption."
+        },
+        {
+            title: "🎯 Inflection Point", 
+            content: "2014-2017 saw the steepest climb as teams like Golden State proved three-point offense could win championships."
+        },
+        {
+            title: "📈 Current Status",
+            content: "By 2024, teams attempt nearly 40% of shots from three - a complete transformation of basketball strategy."
+        }
+    ]);
 }
 
-// Scene 2: Key players (Stephen Curry focus)
-function drawScene2() {
-    const svg = d3.select('#main-svg');
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
-    
+// Continue with remaining scenes in next part due to size constraints...
+
+function drawScene2_Players() {
+    const { svg, g, width, height } = utils.setupSVG('#main-visualization');
     const data = state.data.scene3;
     
     // Find Stephen Curry's data
@@ -466,20 +690,36 @@ function drawScene2() {
         return;
     }
     
-    // Calculate league average 3PA per game (approximate)
+    // Create league average data for comparison
     const leagueAvg = leagueData.map(d => ({
         season: d.season,
         three_pt_rate: d.three_pt_rate
     }));
     
-    // Scales
+    // Enhanced scales
     const xScale = d3.scaleLinear()
-        .domain([2009, 2024]) // Curry's NBA career
+        .domain([2009, 2024])
         .range([0, width]);
     
     const yScale = d3.scaleLinear()
         .domain([0, 70])
         .range([height, 0]);
+    
+    // Add grid
+    const xAxis = g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0, ${height})`)
+        .call(utils.getTimeAxis(xScale, width));
+    
+    const yAxis = g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yScale).tickFormat(d => d + '%').tickSize(-width));
+    
+    // Style grid
+    yAxis.selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
     
     // Line generators
     const curryLine = d3.line()
@@ -492,31 +732,26 @@ function drawScene2() {
         .y(d => yScale(d.three_pt_rate))
         .curve(d3.curveMonotoneX);
     
-    // Add title
-    g.append('text')
-        .attr('class', 'chart-title')
-        .attr('x', width / 2)
-        .attr('y', -20)
-        .text('Stephen Curry vs League Average (3-Point Rate)');
-    
     // Filter league data for Curry's era
     const leagueFiltered = leagueAvg.filter(d => d.season >= 2009 && d.season <= 2024);
     
-    // Draw league average line
+    // Draw league average line (dashed)
     g.append('path')
         .datum(leagueFiltered)
         .attr('class', 'mid-range-line')
         .attr('d', leagueLine)
-        .style('stroke-dasharray', '5,5');
+        .style('stroke-dasharray', '8,5')
+        .style('stroke-width', 3)
+        .style('opacity', 0.7);
     
-    // Draw Curry's line
+    // Draw Curry's line (bold)
     g.append('path')
         .datum(curryData)
         .attr('class', 'three-pt-line')
         .attr('d', curryLine)
-        .style('stroke-width', 4);
+        .style('stroke-width', 5);
     
-    // Add points for Curry
+    // Add points for Curry with enhanced interactivity
     g.selectAll('.curry-point')
         .data(curryData)
         .enter()
@@ -524,19 +759,30 @@ function drawScene2() {
         .attr('class', 'line-point three-pt-point')
         .attr('cx', d => xScale(d.season))
         .attr('cy', d => yScale(d.three_pt_rate))
-        .attr('r', 5)
-        .append('title')
-        .text(d => `${d.season}: ${d.three_pt_rate}% (${d.three_pt_shots} attempts)`);
+        .attr('r', 6)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event, d) {
+            utils.showTooltip(event, `
+                <strong>Stephen Curry - ${d.season}</strong><br/>
+                3-Point Rate: <span style="color: ${CONFIG.colors.threePt}">${d.three_pt_rate}%</span><br/>
+                Made 3-Pointers: ${d.made_threes}<br/>
+                Total Attempts: ${d.three_pt_shots}<br/>
+                Shooting %: ${d.three_pt_percentage}%
+            `);
+            d3.select(this).transition().duration(200).attr('r', 10);
+        })
+        .on('mouseout', function() {
+            utils.hideTooltip();
+            d3.select(this).transition().duration(200).attr('r', 6);
+        });
     
-    // Add axes
-    g.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-    
-    g.append('g')
-        .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+    // Add title
+    g.append('text')
+        .attr('class', 'chart-title')
+        .attr('x', width / 2)
+        .attr('y', -30)
+        .style('font-size', '22px')
+        .text('Stephen Curry vs League Average');
     
     // Add axis labels
     g.append('text')
@@ -554,19 +800,57 @@ function drawScene2() {
         .attr('text-anchor', 'middle')
         .text('3-Point Rate (% of shots)');
     
-    // Find Curry's record season (2016)
+    // Enhanced legend
+    const legend = g.append('g')
+        .attr('transform', `translate(${width - 200}, 40)`);
+    
+    // Stephen Curry line in legend
+    legend.append('line')
+        .attr('x1', 0)
+        .attr('x2', 30)
+        .attr('y1', 10)
+        .attr('y2', 10)
+        .attr('stroke', CONFIG.colors.threePt)
+        .attr('stroke-width', 5);
+    
+    legend.append('text')
+        .attr('x', 40)
+        .attr('y', 14)
+        .style('font-size', '14px')
+        .style('font-weight', '600')
+        .text('Stephen Curry');
+    
+    // League average line in legend
+    legend.append('line')
+        .attr('x1', 0)
+        .attr('x2', 30)
+        .attr('y1', 35)
+        .attr('y2', 35)
+        .attr('stroke', CONFIG.colors.midRange)
+        .attr('stroke-width', 3)
+        .style('stroke-dasharray', '8,5')
+        .style('opacity', 0.7);
+    
+    legend.append('text')
+        .attr('x', 40)
+        .attr('y', 39)
+        .style('font-size', '14px')
+        .style('font-weight', '500')
+        .text('League Average');
+    
+    // Add annotation for record season
     const recordSeason = curryData.find(d => d.season === 2016);
     if (recordSeason) {
         const annotations = [
             {
                 note: {
-                    title: "Record-Breaking 2015-16",
-                    label: `${recordSeason.made_threes} made 3-pointers\n${recordSeason.three_pt_rate}% of shots from three`
+                    title: "Historic 2015-16 Season",
+                    label: `${recordSeason.made_threes} made 3-pointers\n${recordSeason.three_pt_rate}% of all shots from three\nShattered previous records`
                 },
                 x: xScale(recordSeason.season),
                 y: yScale(recordSeason.three_pt_rate),
-                dy: -80,
-                dx: -50
+                dy: -100,
+                dx: -80
             }
         ];
         
@@ -578,56 +862,50 @@ function drawScene2() {
             .call(makeAnnotations);
     }
     
-    // Add legend
-    const legend = g.append('g')
-        .attr('transform', `translate(${width - 180}, 30)`);
-    
-    legend.append('line')
-        .attr('x1', 0)
-        .attr('x2', 20)
-        .attr('y1', 10)
-        .attr('y2', 10)
-        .attr('stroke', colors.threePt)
-        .attr('stroke-width', 4);
-    
-    legend.append('text')
-        .attr('x', 25)
-        .attr('y', 14)
-        .style('font-size', '12px')
-        .text('Stephen Curry');
-    
-    legend.append('line')
-        .attr('x1', 0)
-        .attr('x2', 20)
-        .attr('y1', 35)
-        .attr('y2', 35)
-        .attr('stroke', colors.midRange)
-        .attr('stroke-width', 3)
-        .style('stroke-dasharray', '5,5');
-    
-    legend.append('text')
-        .attr('x', 25)
-        .attr('y', 39)
-        .style('font-size', '12px')
-        .text('League Average');
+    createSecondaryPanels([
+        {
+            title: "🏆 Revolutionary Impact",
+            content: "Curry didn't just break records - he fundamentally changed how basketball is played, inspiring teams worldwide to adopt three-point focused strategies."
+        },
+        {
+            title: "📊 Statistical Dominance",
+            content: `Curry's peak 3PT rate of ${Math.max(...curryData.map(d => d.three_pt_rate))}% was unprecedented, taking nearly 2 out of every 3 shots from beyond the arc.`
+        },
+        {
+            title: "🎯 Accuracy + Volume",
+            content: `Unlike previous shooters, Curry combined extreme volume with elite accuracy, proving that high three-point rates could be both sustainable and effective.`
+        }
+    ]);
 }
 
-// Scene 3: Efficiency trends
-function drawScene3() {
-    const svg = d3.select('#main-svg');
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+function drawScene3_Efficiency() {
+    const { svg, g, width, height } = utils.setupSVG('#main-visualization');
+    const data = state.data.scene2;
     
-    const data = state.data.scene2; // Use league trends data
-    
-    // Scales
+    // Enhanced scales
     const xScale = d3.scaleLinear()
         .domain(d3.extent(data, d => d.season))
         .range([0, width]);
     
     const yScale = d3.scaleLinear()
-        .domain([46, 55])
+        .domain([46, 58])
         .range([height, 0]);
+    
+    // Add grid
+    const xAxis = g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0, ${height})`)
+        .call(utils.getTimeAxis(xScale, width));
+    
+    const yAxis = g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yScale).tickFormat(d => d + '%').tickSize(-width));
+    
+    // Style grid
+    yAxis.selectAll('.tick line')
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-dasharray', '2,2')
+        .attr('opacity', 0.3);
     
     // Line generator
     const efficiencyLine = d3.line()
@@ -635,20 +913,36 @@ function drawScene3() {
         .y(d => yScale(d.efg_percentage))
         .curve(d3.curveMonotoneX);
     
-    // Add title
-    g.append('text')
-        .attr('class', 'chart-title')
-        .attr('x', width / 2)
-        .attr('y', -20)
-        .text('League Shooting Efficiency Over Time');
+    // Add area under curve for visual impact
+    const area = d3.area()
+        .x(d => xScale(d.season))
+        .y0(height)
+        .y1(d => yScale(d.efg_percentage))
+        .curve(d3.curveMonotoneX);
     
-    // Add grid lines
-    g.append('g')
-        .attr('class', 'grid')
-        .call(d3.axisLeft(yScale)
-            .tickSize(-width)
-            .tickFormat('')
-        );
+    // Define gradient for area
+    const defs = svg.append('defs');
+    const gradient = defs.append('linearGradient')
+        .attr('id', 'efficiencyGradient')
+        .attr('x1', '0%').attr('y1', '0%')
+        .attr('x2', '0%').attr('y2', '100%');
+    
+    gradient.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', CONFIG.colors.efficiency)
+        .attr('stop-opacity', 0.4);
+        
+    gradient.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', CONFIG.colors.efficiency)
+        .attr('stop-opacity', 0.1);
+    
+    // Draw area
+    g.append('path')
+        .datum(data)
+        .attr('class', 'efficiency-area')
+        .attr('d', area)
+        .attr('fill', 'url(#efficiencyGradient)');
     
     // Draw efficiency line
     g.append('path')
@@ -657,7 +951,7 @@ function drawScene3() {
         .attr('d', efficiencyLine)
         .style('stroke-width', 4);
     
-    // Add points
+    // Add interactive points
     g.selectAll('.efficiency-point')
         .data(data)
         .enter()
@@ -665,18 +959,29 @@ function drawScene3() {
         .attr('class', 'line-point efficiency-point')
         .attr('cx', d => xScale(d.season))
         .attr('cy', d => yScale(d.efg_percentage))
-        .append('title')
-        .text(d => `${d.season}: ${d.efg_percentage}% eFG%`);
+        .attr('r', 5)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event, d) {
+            utils.showTooltip(event, `
+                <strong>${d.season} Season</strong><br/>
+                Effective FG%: <span style="color: ${CONFIG.colors.efficiency}">${d.efg_percentage}%</span><br/>
+                3-Point Rate: ${d.three_pt_rate}%<br/>
+                Efficiency Change: ${d.efficiencyChange > 0 ? '+' : ''}${d.efficiencyChange?.toFixed(2) || 0}%
+            `);
+            d3.select(this).transition().duration(200).attr('r', 8);
+        })
+        .on('mouseout', function() {
+            utils.hideTooltip();
+            d3.select(this).transition().duration(200).attr('r', 5);
+        });
     
-    // Add axes
-    g.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-    
-    g.append('g')
-        .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+    // Add title
+    g.append('text')
+        .attr('class', 'chart-title')
+        .attr('x', width / 2)
+        .attr('y', -30)
+        .style('font-size', '22px')
+        .text('League Shooting Efficiency Over Time');
     
     // Add axis labels
     g.append('text')
@@ -694,29 +999,20 @@ function drawScene3() {
         .attr('text-anchor', 'middle')
         .text('Effective Field Goal Percentage');
     
-    // Add annotations
+    // Add annotations for key insights
     const firstYear = data[0];
     const lastYear = data[data.length - 1];
+    const improvement = lastYear.efg_percentage - firstYear.efg_percentage;
     
     const annotations = [
         {
             note: {
-                title: "2004: Lower Efficiency",
-                label: `${firstYear.efg_percentage}% eFG%`
-            },
-            x: xScale(firstYear.season),
-            y: yScale(firstYear.efg_percentage),
-            dy: 50,
-            dx: 50
-        },
-        {
-            note: {
-                title: "2024: Record Efficiency",
-                label: `${lastYear.efg_percentage}% eFG%\n+${(lastYear.efg_percentage - firstYear.efg_percentage).toFixed(1)} percentage points`
+                title: "Efficiency Gains",
+                label: `+${improvement.toFixed(1)} percentage points\nfrom ${firstYear.efg_percentage}% to ${lastYear.efg_percentage}%`
             },
             x: xScale(lastYear.season),
             y: yScale(lastYear.efg_percentage),
-            dy: -60,
+            dy: -80,
             dx: -100
         }
     ];
@@ -731,47 +1027,74 @@ function drawScene3() {
     // Add explanation text
     g.append('text')
         .attr('x', width / 2)
-        .attr('y', height + 70)
+        .attr('y', height + 75)
         .attr('text-anchor', 'middle')
-        .style('font-size', '11px')
-        .style('fill', '#666')
+        .style('font-size', '12px')
+        .style('fill', CONFIG.colors.gray)
         .text('Effective FG% = (FGM + 0.5 × 3PM) / FGA (accounts for extra value of 3-pointers)');
+    
+    createSecondaryPanels([
+        {
+            title: "📈 Steady Improvement",
+            content: `League efficiency improved by ${improvement.toFixed(1)} percentage points over 20 years, directly correlating with increased three-point usage.`
+        },
+        {
+            title: "🎯 Mathematical Advantage",
+            content: "Three-pointers offer 50% more points than two-pointers, making them mathematically superior even at lower shooting percentages."
+        },
+        {
+            title: "🏆 Strategic Evolution",
+            content: "Teams discovered that attempting more three-pointers leads to higher scoring efficiency, better spacing, and more wins."
+        }
+    ]);
 }
 
-// Scene 4: Interactive exploration
-function drawScene4() {
-    const svg = d3.select('#main-svg');
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+function drawScene4_Explorer() {
+    updateExplorerVisualization();
+}
+
+function updateExplorerVisualization() {
+    const { svg, g, width, height } = utils.setupSVG('#explorer-main', 800, 400);
     
-    const data = state.data.scene3;
-    const selectedPlayerData = data.find(p => p.player === state.selectedPlayer)?.seasons || [];
-    
-    if (selectedPlayerData.length === 0) {
-        g.append('text')
-            .attr('x', width / 2)
-            .attr('y', height / 2)
-            .attr('text-anchor', 'middle')
-            .style('font-size', '16px')
-            .text(`No data available for ${state.selectedPlayer}`);
-        return;
+    switch (state.viewMode) {
+        case 'evolution':
+            drawPlayerEvolution(g, width, height);
+            break;
+        case 'comparison':
+            drawPlayerComparison(g, width, height);
+            break;
+        case 'heatmap':
+            drawShotHeatmap(g, width, height);
+            break;
     }
+    
+    updatePlayerStats();
+}
+
+function drawPlayerEvolution(g, width, height) {
+    const playerData = state.data.scene3.find(p => p.player === state.selectedPlayer);
+    if (!playerData) return;
+    
+    const filteredSeasons = playerData.seasons.filter(s => 
+        s.season >= state.startYear && s.season <= state.endYear
+    );
     
     // Scales
     const xScale = d3.scaleLinear()
-        .domain(d3.extent(selectedPlayerData, d => d.season))
+        .domain([state.startYear, state.endYear])
         .range([0, width]);
     
     const yScale = d3.scaleLinear()
-        .domain([0, d3.max(selectedPlayerData, d => Math.max(d.three_pt_rate, 100 - d.three_pt_rate))])
+        .domain([0, 100])
         .range([height, 0]);
     
-    // Create stacked data (3PT rate vs other shots rate)
-    const stackedData = selectedPlayerData.map(d => ({
+    // Create stacked data for area chart
+    const stackedData = filteredSeasons.map(d => ({
         season: d.season,
         three_pt_rate: d.three_pt_rate,
         other_rate: 100 - d.three_pt_rate,
         three_pt_shots: d.three_pt_shots,
+        made_threes: d.made_threes,
         total_shots: d.total_shots
     }));
     
@@ -788,150 +1111,224 @@ function drawScene4() {
         .y1(d => yScale(d.other_rate))
         .curve(d3.curveMonotoneX);
     
-    // Add title
-    g.append('text')
-        .attr('class', 'chart-title')
-        .attr('x', width / 2)
-        .attr('y', -20)
-        .text(`${state.selectedPlayer}: Shot Profile Evolution`);
-    
     // Draw areas
     g.append('path')
         .datum(stackedData)
         .attr('class', 'area-other')
         .attr('d', areaOther)
-        .style('fill', colors.midRange)
+        .style('fill', CONFIG.colors.midRange)
         .style('opacity', 0.7);
     
     g.append('path')
         .datum(stackedData)
         .attr('class', 'area-three-pt')
         .attr('d', area3Pt)
-        .style('fill', colors.threePt)
+        .style('fill', CONFIG.colors.threePt)
         .style('opacity', 0.7);
+    
+    // Add axes with proper spacing
+    g.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0, ${height})`)
+        .call(utils.getTimeAxis(xScale, width));
+    
+    g.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
     
     // Add interactive points
     g.selectAll('.interactive-point')
         .data(stackedData)
         .enter()
         .append('circle')
-        .attr('class', 'interactive-point interactive-element')
+        .attr('class', 'interactive-point')
         .attr('cx', d => xScale(d.season))
         .attr('cy', d => yScale(d.other_rate + d.three_pt_rate / 2))
         .attr('r', 6)
         .style('fill', 'white')
-        .style('stroke', colors.threePt)
+        .style('stroke', CONFIG.colors.threePt)
         .style('stroke-width', 3)
+        .style('cursor', 'pointer')
         .on('mouseover', function(event, d) {
-            showTooltip(event, `
-                <strong>${d.season} Season</strong><br/>
+            utils.showTooltip(event, `
+                <strong>${state.selectedPlayer} - ${d.season}</strong><br/>
                 3-Point Rate: ${d.three_pt_rate.toFixed(1)}%<br/>
                 3-Point Attempts: ${d.three_pt_shots}<br/>
+                Made 3-Pointers: ${d.made_threes}<br/>
                 Total Shots: ${d.total_shots}
             `);
         })
-        .on('mouseout', hideTooltip);
+        .on('mouseout', utils.hideTooltip);
     
-    // Add axes
-    g.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-    
-    g.append('g')
-        .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
-    
-    // Add axis labels
+    // Add title
     g.append('text')
-        .attr('class', 'axis-label')
+        .attr('class', 'chart-title')
         .attr('x', width / 2)
-        .attr('y', height + 50)
-        .attr('text-anchor', 'middle')
-        .text('Season');
-    
-    g.append('text')
-        .attr('class', 'axis-label')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', -50)
-        .attr('x', -height / 2)
-        .attr('text-anchor', 'middle')
-        .text('Shot Distribution');
-    
-    // Add legend
-    const legend = g.append('g')
-        .attr('transform', `translate(${width - 150}, 30)`);
-    
-    legend.append('rect')
-        .attr('width', 15)
-        .attr('height', 15)
-        .attr('fill', colors.threePt)
-        .style('opacity', 0.7);
-    
-    legend.append('text')
-        .attr('x', 20)
-        .attr('y', 12)
-        .style('font-size', '12px')
-        .text('3-Point Shots');
-    
-    legend.append('rect')
-        .attr('y', 25)
-        .attr('width', 15)
-        .attr('height', 15)
-        .attr('fill', colors.midRange)
-        .style('opacity', 0.7);
-    
-    legend.append('text')
-        .attr('x', 20)
-        .attr('y', 37)
-        .style('font-size', '12px')
-        .text('Other Shots');
-    
-    // Add instruction text
+        .attr('y', -20)
+        .text(`${state.selectedPlayer}: Shot Profile Evolution`);
+}
+
+function drawPlayerComparison(g, width, height) {
+    // Implementation for player comparison view
     g.append('text')
         .attr('x', width / 2)
-        .attr('y', height + 70)
+        .attr('y', height / 2)
         .attr('text-anchor', 'middle')
-        .style('font-size', '12px')
-        .style('fill', '#666')
-        .text('Hover over points for detailed statistics');
+        .style('font-size', '18px')
+        .text('Player Comparison View - Coming Soon');
 }
 
-// Tooltip functions
-function showTooltip(event, content) {
-    const tooltip = d3.select('body').append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 0);
+function drawShotHeatmap(g, width, height) {
+    // Implementation for shot distribution heatmap
+    g.append('text')
+        .attr('x', width / 2)
+        .attr('y', height / 2)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '18px')
+        .text('Shot Distribution Heatmap - Coming Soon');
+}
+
+function updatePlayerStats() {
+    const playerData = state.data.scene3.find(p => p.player === state.selectedPlayer);
+    if (!playerData) return;
     
-    tooltip.html(content)
-        .style('left', (event.pageX + 10) + 'px')
-        .style('top', (event.pageY - 10) + 'px')
-        .transition()
-        .duration(200)
-        .style('opacity', 1);
+    const stats = playerData.seasons;
+    const careerStats = {
+        totalSeasons: stats.length,
+        totalThrees: stats.reduce((sum, s) => sum + s.made_threes, 0),
+        totalAttempts: stats.reduce((sum, s) => sum + s.three_pt_shots, 0),
+        avgRate: (stats.reduce((sum, s) => sum + s.three_pt_rate, 0) / stats.length).toFixed(1),
+        peakRate: Math.max(...stats.map(s => s.three_pt_rate)).toFixed(1)
+    };
+    
+    const accuracy = ((careerStats.totalThrees / careerStats.totalAttempts) * 100).toFixed(1);
+    
+    document.getElementById('player-stats').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+            <div><strong>Seasons:</strong> ${careerStats.totalSeasons}</div>
+            <div><strong>Made 3s:</strong> ${careerStats.totalThrees}</div>
+            <div><strong>Attempts:</strong> ${careerStats.totalAttempts}</div>
+            <div><strong>Accuracy:</strong> ${accuracy}%</div>
+            <div><strong>Avg Rate:</strong> ${careerStats.avgRate}%</div>
+            <div><strong>Peak Rate:</strong> ${careerStats.peakRate}%</div>
+        </div>
+    `;
 }
 
-function hideTooltip() {
-    d3.selectAll('.tooltip').remove();
+// Timeline visualization for Scene 1
+function drawTimeline() {
+    const { svg, g, width, height } = utils.setupSVG('#timeline-viz', 900, 100);
+    const data = state.data.scene2;
+    
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.season))
+        .range([0, width]);
+    
+    const radiusScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.three_pt_rate))
+        .range([3, 15]);
+    
+    // Timeline line
+    g.append('line')
+        .attr('x1', 0)
+        .attr('x2', width)
+        .attr('y1', height/2)
+        .attr('y2', height/2)
+        .attr('stroke', CONFIG.colors.gray)
+        .attr('stroke-width', 2);
+    
+    // Timeline points
+    g.selectAll('.timeline-point')
+        .data(data)
+        .enter()
+        .append('circle')
+        .attr('class', 'timeline-point')
+        .attr('cx', d => xScale(d.season))
+        .attr('cy', height/2)
+        .attr('r', d => radiusScale(d.three_pt_rate))
+        .attr('fill', CONFIG.colors.threePt)
+        .attr('stroke', CONFIG.colors.background)
+        .attr('stroke-width', 2)
+        .style('cursor', 'pointer')
+        .on('mouseover', function(event, d) {
+            utils.showTooltip(event, `
+                <strong>${d.season}</strong><br/>
+                3PT Rate: ${d.three_pt_rate}%<br/>
+                Total Shots: ${utils.formatNumber(d.total_shots)}
+            `);
+        })
+        .on('mouseout', utils.hideTooltip);
 }
 
-// Error handling
+// Utility functions
+function createSecondaryPanels(panels) {
+    const container = document.getElementById('secondary-panels');
+    container.innerHTML = '';
+    
+    panels.forEach((panel, index) => {
+        const panelDiv = document.createElement('div');
+        panelDiv.className = 'secondary-panel fade-in';
+        panelDiv.style.animationDelay = `${index * 100}ms`;
+        
+        panelDiv.innerHTML = `
+            <h3 class="panel-title">${panel.title}</h3>
+            <div class="panel-content">${panel.content}</div>
+        `;
+        
+        container.appendChild(panelDiv);
+    });
+}
+
+function showLoading() {
+    document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').classList.add('hidden');
+}
+
 function showError(message) {
-    const svg = d3.select('#main-svg');
-    svg.selectAll('*').remove();
+    console.error(message);
+    // Implement error display
+}
+
+function toggleTimelineAnimation() {
+    const btn = document.getElementById('play-btn');
     
-    svg.append('text')
-        .attr('x', 400)
-        .attr('y', 250)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '16px')
-        .style('fill', 'red')
-        .text(message);
+    if (state.isPlaying) {
+        clearInterval(state.animationFrame);
+        btn.textContent = '▶️ Play Timeline';
+        state.isPlaying = false;
+    } else {
+        btn.textContent = '⏸️ Pause Timeline';
+        state.isPlaying = true;
+        
+        let currentYear = 2004;
+        state.animationFrame = setInterval(() => {
+            document.getElementById('timeline-year').textContent = currentYear;
+            
+            // Update visualization for current year
+            highlightTimelineYear(currentYear);
+            
+            currentYear++;
+            if (currentYear > 2024) {
+                currentYear = 2004;
+            }
+        }, 500);
+    }
+}
+
+function highlightTimelineYear(year) {
+    d3.selectAll('.timeline-point')
+        .attr('stroke-width', d => d.season === year ? 4 : 2)
+        .attr('stroke', d => d.season === year ? CONFIG.colors.accent : CONFIG.colors.background);
 }
 
 // Export for debugging
-window.NBAVisualization = {
+window.NBADashboard = {
     state,
+    CONFIG,
     updateScene,
-    changeScene
+    changeScene,
+    utils
 };

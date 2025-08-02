@@ -3,60 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The NBA's Three-Point Revolution</title>
+    <title>NBA Three-Point Revolution: Interactive Analytics Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-annotation@2.5.1/d3-annotation.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>The NBA's Three-Point Revolution</h1>
-            <p class="subtitle">How the league transformed from mid-range to beyond the arc (2004-2024)</p>
-        </header>
-
-        <main>
-            <!-- Scene content will be dynamically loaded here -->
-            <div id="scene-container">
-                <div id="scene-text">
-                    <h2 id="scene-title">Loading...</h2>
-                    <p id="scene-description">Analyzing 4.2 million shots across 21 NBA seasons...</p>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">🏀 The NBA's Three-Point Revolution</h1>
+            <p class="hero-subtitle">An interactive deep dive into how basketball transformed from mid-range to beyond the arc</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-number">4.2M+</div>
+                    <div class="stat-label">Shots Analyzed</div>
                 </div>
-                <div id="visualization-container">
-                    <svg id="main-svg" width="800" height="500"></svg>
+                <div class="stat-card">
+                    <div class="stat-number">21</div>
+                    <div class="stat-label">Seasons (2004-2024)</div>
                 </div>
-            </div>
-
-            <!-- Navigation Controls -->
-            <div id="navigation">
-                <button id="prev-btn" class="nav-btn" disabled>← Previous</button>
-                <div id="scene-indicator">
-                    <span id="current-scene">1</span> / <span id="total-scenes">5</span>
-                </div>
-                <button id="next-btn" class="nav-btn">Next →</button>
-            </div>
-
-            <!-- Interactive Controls (shown only in final scene) -->
-            <div id="interactive-controls" style="display: none;">
-                <h3>Explore the Data</h3>
-                <div class="control-group">
-                    <label for="player-select">Select a Player:</label>
-                    <select id="player-select">
-                        <option value="Stephen Curry">Stephen Curry</option>
-                        <option value="James Harden">James Harden</option>
-                        <option value="Klay Thompson">Klay Thompson</option>
-                        <option value="Ray Allen">Ray Allen</option>
-                        <option value="Damian Lillard">Damian Lillard</option>
-                    </select>
+                <div class="stat-card">
+                    <div class="stat-number">2.1x</div>
+                    <div class="stat-label">3PT Rate Increase</div>
                 </div>
             </div>
-        </main>
-
-        <footer>
-            <p>Data source: <a href="https://www.kaggle.com/datasets/mexwell/nba-shots" target="_blank">NBA Shots Dataset (2004-2024)</a></p>
-            <p>Created with D3.js for CS 416 - Data Visualization</p>
-        </footer>
+        </div>
     </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container">
+        
+        <!-- Scene Navigation -->
+        <div class="scene-nav">
+            <div class="nav-pills">
+                <button class="nav-pill active" data-scene="0">📊 Overview</button>
+                <button class="nav-pill" data-scene="1">📈 Evolution</button>
+                <button class="nav-pill" data-scene="2">⭐ Players</button>
+                <button class="nav-pill" data-scene="3">🎯 Efficiency</button>
+                <button class="nav-pill" data-scene="4">🔍 Explorer</button>
+            </div>
+        </div>
+
+        <!-- Scene Content -->
+        <div class="scene-content">
+            <!-- Scene Description -->
+            <div class="scene-description">
+                <h2 id="scene-title">The Great Transformation</h2>
+                <p id="scene-subtitle">Discover how the NBA fundamentally changed its offensive strategy</p>
+            </div>
+
+            <!-- Main Visualization Panel -->
+            <div class="main-viz-panel">
+                <svg id="main-visualization"></svg>
+                <div class="chart-controls" id="chart-controls" style="display: none;">
+                    <!-- Dynamic controls will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Secondary Panels -->
+            <div class="secondary-panels" id="secondary-panels">
+                <!-- These will be populated dynamically per scene -->
+            </div>
+
+            <!-- Interactive Explorer (Scene 4) -->
+            <div class="explorer-dashboard" id="explorer-dashboard" style="display: none;">
+                <div class="explorer-controls">
+                    <div class="control-section">
+                        <h3>🏀 Player Analysis</h3>
+                        <div class="player-selector">
+                            <select id="player-select" class="modern-select">
+                                <option value="Stephen Curry">Stephen Curry</option>
+                                <option value="James Harden">James Harden</option>
+                                <option value="Klay Thompson">Klay Thompson</option>
+                                <option value="Ray Allen">Ray Allen</option>
+                                <option value="Damian Lillard">Damian Lillard</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>📅 Time Range</h3>
+                        <div class="time-controls">
+                            <div class="year-slider-container">
+                                <input type="range" id="start-year" min="2004" max="2024" value="2004" class="year-slider">
+                                <input type="range" id="end-year" min="2004" max="2024" value="2024" class="year-slider">
+                                <div class="year-labels">
+                                    <span id="start-year-label">2004</span>
+                                    <span id="end-year-label">2024</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>📊 View Mode</h3>
+                        <div class="view-toggles">
+                            <button class="toggle-btn active" data-view="evolution">Evolution</button>
+                            <button class="toggle-btn" data-view="comparison">Compare Players</button>
+                            <button class="toggle-btn" data-view="heatmap">Shot Distribution</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="explorer-visualizations">
+                    <div class="explorer-main-chart">
+                        <svg id="explorer-main"></svg>
+                    </div>
+                    <div class="explorer-side-charts">
+                        <div class="side-chart">
+                            <h4>Career Statistics</h4>
+                            <div id="player-stats"></div>
+                        </div>
+                        <div class="side-chart">
+                            <h4>Shot Efficiency</h4>
+                            <svg id="efficiency-chart"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Navigation -->
+        <div class="timeline-nav" id="timeline-nav" style="display: none;">
+            <div class="timeline-container">
+                <svg id="timeline-viz"></svg>
+                <div class="timeline-controls">
+                    <button id="play-btn" class="play-btn">▶️ Play Timeline</button>
+                    <div class="timeline-year-display" id="timeline-year">2004</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="navigation-controls">
+            <button id="prev-btn" class="nav-button" disabled>
+                <span>← Previous</span>
+            </button>
+            <div class="scene-progress">
+                <div class="progress-dots">
+                    <div class="dot active" data-scene="0"></div>
+                    <div class="dot" data-scene="1"></div>
+                    <div class="dot" data-scene="2"></div>
+                    <div class="dot" data-scene="3"></div>
+                    <div class="dot" data-scene="4"></div>
+                </div>
+                <div class="scene-counter">
+                    <span id="current-scene-num">1</span> / <span>5</span>
+                </div>
+            </div>
+            <button id="next-btn" class="nav-button">
+                <span>Next →</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading NBA analytics...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="data-source">
+                <strong>Data Source:</strong> 
+                <a href="https://www.kaggle.com/datasets/mexwell/nba-shots" target="_blank">NBA Shots Dataset (2004-2024)</a>
+            </div>
+            <div class="tech-stack">
+                <strong>Built with:</strong> D3.js, HTML5, CSS3 | 
+                <strong>For:</strong> CS 416 - Data Visualization
+            </div>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
