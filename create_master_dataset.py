@@ -51,11 +51,11 @@ def combine_nba_datasets():
     print("=" * 50)
     
     # Find all NBA CSV files
-    data_files = glob.glob("NBA_*_Shots.csv")
+    data_files = glob.glob("Data/NBA_*_Shots.csv")
     data_files.sort()
     
     if not data_files:
-        print("❌ No NBA CSV files found in current directory!")
+        print("❌ No NBA CSV files found in Data/ directory!")
         return None
     
     print(f"📁 Found {len(data_files)} NBA shot files")

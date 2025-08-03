@@ -461,7 +461,7 @@
     margin-bottom: 20px;
 }
 
-.stat-card {
+.explorer-stat-card {
     display: flex;
     justify-content: space-between;
     align-items: center;

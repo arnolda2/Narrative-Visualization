@@ -1,1409 +1,1128 @@
-// Enhanced NBA Explorer - Professional Analytics Dashboard
-// This replaces the basic explorer with a comprehensive data exploration tool
-
+// Enhanced NBA Explorer - Core functionality
 class NBAAdvancedExplorer {
     constructor() {
-        this.data = {};
-        this.currentAnalysis = 'player_evolution';
-        this.selectedPlayers = ['Stephen Curry'];
-        this.selectedTeams = [];
+        this.data = null;
+        this.topShooters = null;
+        this.selectedTeams = new Set();
+        this.selectedPlayers = new Set();
+        this.currentView = 'teams';
         this.timeRange = { start: 2004, end: 2024 };
-        this.chartDimensions = { width: 900, height: 500 };
-        this.animationDuration = 750;
-        
-        // Advanced color scheme
         this.colors = {
-            primary: ['#ea580c', '#dc2626', '#7c3aed', '#059669', '#0284c7'],
+            primary: '#ea580c',
+            secondary: '#1e40af',
+            success: '#16a34a',
             accent: '#f59e0b',
-            background: '#f8fafc',
-            grid: '#e2e8f0',
-            text: '#0f172a'
-        };
-        
-        this.chartTypes = {
-            player_evolution: 'Player Performance Evolution',
-            player_comparison: 'Multi-Player Comparison',
-            team_evolution: 'Team Strategy Evolution', 
-            league_analysis: 'League-Wide Analysis',
-            shot_distribution: 'Shot Distribution Analysis',
-            efficiency_matrix: 'Efficiency Matrix',
-            trend_correlation: 'Trend Correlation Analysis',
-            performance_radar: 'Performance Radar Chart'
+            gray: '#64748b'
         };
     }
-    
+
     async initialize() {
-        console.log('🚀 Initializing Enhanced NBA Explorer...');
-        
         try {
-            // Load comprehensive datasets
-            await this.loadData();
-            
-            // Setup advanced UI components
-            this.setupAdvancedInterface();
-            
-            // Initialize default visualization
-            this.renderVisualization();
-            
-            console.log('✅ Enhanced Explorer initialized successfully');
-            
+            console.log('🏀 Initializing Enhanced NBA Explorer...');
+            await this.loadMasterData();
+            this.setupAdvancedUI();
+            this.updateVisualization();
+            console.log('✅ Enhanced NBA Explorer initialized successfully');
         } catch (error) {
-            console.error('❌ Error initializing Enhanced Explorer:', error);
-            this.showError(error.message);
+            console.error('❌ Failed to initialize enhanced explorer:', error);
+            this.showError('Failed to load master dataset');
         }
     }
-    
-    async loadData() {
-        console.log('📊 Loading comprehensive datasets...');
-        
-        const datasets = await Promise.all([
-            d3.json('data/enhanced_explorer_data.json'),
-            d3.json('data/master/team_season.json'),
-            d3.json('data/master/player_career.json')
-        ]);
-        
-        this.data = {
-            explorer: datasets[0],
-            teamSeasons: datasets[1],
-            playerCareers: datasets[2]
-        };
-        
-        // Process data for advanced analytics
-        this.processAdvancedMetrics();
-        
-        console.log(`✅ Loaded data for ${this.data.explorer.top_three_point_shooters.length} top shooters and ${this.data.explorer.all_teams.length} teams`);
-    }
-    
-    processAdvancedMetrics() {
-        console.log('🔬 Processing advanced analytics...');
-        
-        // Process top shooters data
-        this.topShooters = this.data.explorer.top_three_point_shooters;
-        this.teamStructure = this.data.explorer.team_conference_structure;
-        this.teamTrends = this.data.explorer.team_yearly_trends;
-        this.playerTrends = this.data.explorer.player_yearly_trends;
-        
-        console.log('✅ Processed explorer data:', {
-            topShooters: this.topShooters.length,
-            teamTrends: this.teamTrends.length,
-            playerTrends: this.playerTrends.length
-        });
-            player.career_summary = this.calculateCareerSummary(player.seasons);
-        });
-        
-        // Calculate league benchmarks
-        this.data.benchmarks = this.calculateLeagueBenchmarks();
-        
-        // Create correlation matrices
-        this.data.correlations = this.calculateCorrelations();
-    }
-    
-    calculateTrueShootingPercentage(season) {
-        // Simplified TS% calculation (would need free throw data for exact)
-        const fgm = season.total_shots * (season.fg_percentage || 45) / 100;
-        const threepm = season.made_threes || season.three_pt_shots * (season.three_pt_percentage || 35) / 100;
-        const twopm = fgm - threepm;
-        const points = (twopm * 2) + (threepm * 3);
-        return (points / (2 * season.total_shots)) * 100;
-    }
-    
-    calculateEffectiveFG(season) {
-        const fgm = season.total_shots * (season.fg_percentage || 45) / 100;
-        const threepm = season.made_threes || season.three_pt_shots * (season.three_pt_percentage || 35) / 100;
-        return ((fgm + 0.5 * threepm) / season.total_shots) * 100;
-    }
-    
-    calculateImpactScore(season) {
-        // Custom impact metric combining volume and efficiency
-        const volumeScore = Math.min(season.three_pt_shots / 300, 1) * 50; // Normalize to 50 max
-        const efficiencyScore = Math.min(season.three_pt_percentage / 45, 1) * 50; // Normalize to 50 max
-        return volumeScore + efficiencyScore;
-    }
-    
-    calculateConsistency(seasons, currentIndex) {
-        if (currentIndex < 2) return 50; // Default for early career
-        
-        const recentSeasons = seasons.slice(Math.max(0, currentIndex - 2), currentIndex + 1);
-        const rates = recentSeasons.map(s => s.three_pt_rate);
-        const mean = rates.reduce((a, b) => a + b) / rates.length;
-        const variance = rates.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / rates.length;
-        const stdDev = Math.sqrt(variance);
-        
-        // Convert to 0-100 scale (lower std dev = higher consistency)
-        return Math.max(0, 100 - stdDev * 10);
-    }
-    
-    calculateCareerSummary(seasons) {
-        return {
-            total_seasons: seasons.length,
-            peak_three_pt_rate: Math.max(...seasons.map(s => s.three_pt_rate)),
-            peak_efficiency: Math.max(...seasons.map(s => s.three_pt_percentage)),
-            total_threes: seasons.reduce((sum, s) => sum + (s.made_threes || 0), 0),
-            career_progression: seasons.length > 1 ? 
-                seasons[seasons.length - 1].three_pt_rate - seasons[0].three_pt_rate : 0,
-            prime_years: seasons.filter(s => s.three_pt_rate > 35 && s.three_pt_percentage > 35).length
-        };
-    }
-    
-    calculateLeagueBenchmarks() {
-        // Calculate percentile benchmarks across all players and seasons
-        const allSeasons = this.data.players.flatMap(p => p.seasons);
-        
-        const metrics = ['three_pt_rate', 'three_pt_percentage', 'total_shots'];
-        const benchmarks = {};
-        
-        metrics.forEach(metric => {
-            const values = allSeasons.map(s => s[metric]).filter(v => v != null).sort((a, b) => a - b);
-            benchmarks[metric] = {
-                p10: this.percentile(values, 10),
-                p25: this.percentile(values, 25),
-                p50: this.percentile(values, 50),
-                p75: this.percentile(values, 75),
-                p90: this.percentile(values, 90),
-                p95: this.percentile(values, 95)
-            };
-        });
-        
-        return benchmarks;
-    }
-    
-    percentile(arr, p) {
-        const index = (p / 100) * (arr.length - 1);
-        if (Math.floor(index) === index) {
-            return arr[index];
-        } else {
-            const lower = arr[Math.floor(index)];
-            const upper = arr[Math.ceil(index)];
-            return lower + (upper - lower) * (index - Math.floor(index));
+
+    async loadMasterData() {
+        try {
+            const [masterData, topShooters] = await Promise.all([
+                d3.json('data/master_three_point_data.json'),
+                d3.json('data/top_20_three_point_shooters.json')
+            ]);
+            
+            this.data = masterData;
+            this.topShooters = topShooters;
+            
+            console.log('✅ Master data loaded:', {
+                teams: this.data.team_data.length,
+                players: this.data.player_data.length,
+                topShooters: this.topShooters.length
+            });
+        } catch (error) {
+            console.error('❌ Error loading master data:', error);
+            throw new Error('Could not load master dataset');
         }
     }
-    
-    calculateCorrelations() {
-        // Calculate correlations between different metrics
-        const allSeasons = this.data.players.flatMap(p => p.seasons);
-        
-        const correlations = {};
-        const metrics = ['three_pt_rate', 'three_pt_percentage', 'total_shots', 'impact_score'];
-        
-        for (let i = 0; i < metrics.length; i++) {
-            for (let j = i + 1; j < metrics.length; j++) {
-                const metric1 = metrics[i];
-                const metric2 = metrics[j];
-                
-                const pairs = allSeasons
-                    .filter(s => s[metric1] != null && s[metric2] != null)
-                    .map(s => [s[metric1], s[metric2]]);
-                
-                if (pairs.length > 10) {
-                    correlations[`${metric1}_vs_${metric2}`] = this.pearsonCorrelation(pairs);
-                }
-            }
-        }
-        
-        return correlations;
-    }
-    
-    pearsonCorrelation(pairs) {
-        const n = pairs.length;
-        const sumX = pairs.reduce((sum, [x, y]) => sum + x, 0);
-        const sumY = pairs.reduce((sum, [x, y]) => sum + y, 0);
-        const sumXY = pairs.reduce((sum, [x, y]) => sum + x * y, 0);
-        const sumX2 = pairs.reduce((sum, [x, y]) => sum + x * x, 0);
-        const sumY2 = pairs.reduce((sum, [x, y]) => sum + y * y, 0);
-        
-        const numerator = n * sumXY - sumX * sumY;
-        const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-        
-        return denominator === 0 ? 0 : numerator / denominator;
-    }
-    
-    setupAdvancedInterface() {
-        console.log('🎨 Setting up advanced interface...');
-        
-        // Create main explorer container
-        const explorerContainer = d3.select('#explorer-dashboard');
-        
-        // Clear existing content
-        explorerContainer.selectAll('*').remove();
-        
-        // Create advanced layout
-        const layout = explorerContainer.append('div')
-            .attr('class', 'advanced-explorer-layout');
-        
-        // Control Panel
-        this.createAdvancedControlPanel(layout);
-        
-        // Main visualization area
-        this.createAdvancedVisualizationArea(layout);
-        
-        // Statistics panel
-        this.createAdvancedStatsPanel(layout);
-        
-        // Initialize with default state
-        this.updateInterface();
-        
-        // Populate teams and players from real data
+
+    setupAdvancedUI() {
+        const explorerContainer = document.getElementById('explorer-dashboard');
+        explorerContainer.innerHTML = this.createFullUIHTML();
+        this.bindEventListeners();
         this.populateTeamFilters();
-        this.populatePlayerSearch();
+        this.populateTopShooters();
     }
-    
-    createAdvancedControlPanel(container) {
-        const controlPanel = container.append('div')
-            .attr('class', 'advanced-control-panel');
-        
-        // Analysis type selector
-        const analysisSection = controlPanel.append('div')
-            .attr('class', 'control-section');
-        
-        analysisSection.append('h3')
-            .text('🔬 Analysis Type');
-        
-        const analysisGrid = analysisSection.append('div')
-            .attr('class', 'analysis-type-grid');
-        
-        Object.entries(this.chartTypes).forEach(([key, label]) => {
-            const button = analysisGrid.append('button')
-                .attr('class', `analysis-type-btn ${key === this.currentAnalysis ? 'active' : ''}`)
-                .attr('data-analysis', key)
-                .text(label);
+
+    createFullUIHTML() {
+        return `
+            <div style="display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; height: 700px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 20px;">
+                <!-- Control Panel -->
+                <div style="background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border: 1px solid #e2e8f0;">
+                    ${this.createControlPanelHTML()}
+                </div>
+                
+                <!-- Main Visualization -->
+                <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                    ${this.createVisualizationAreaHTML()}
+                </div>
+                
+                <!-- Statistics Panel -->
+                <div style="background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border: 1px solid #e2e8f0;">
+                    ${this.createStatsPanelHTML()}
+                </div>
+            </div>
+        `;
+    }
+
+    createControlPanelHTML() {
+        return `
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🎯 Analysis Type</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                    <button class="analysis-type-btn active" data-type="teams" style="padding: 12px 16px; background: linear-gradient(135deg, #ea580c, #dc2626); color: white; border: 2px solid #ea580c; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-size: 13px; font-weight: 500; text-align: left;">
+                        🏟️ Team Trends
+                    </button>
+                    <button class="analysis-type-btn" data-type="players" style="padding: 12px 16px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-size: 13px; font-weight: 500; text-align: left; color: #475569;">
+                        🏀 Player Comparison
+                    </button>
+                    <button class="analysis-type-btn" data-type="shooters" style="padding: 12px 16px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-size: 13px; font-weight: 500; text-align: left; color: #475569;">
+                        🎯 Elite Shooters
+                    </button>
+                </div>
+            </div>
+
+            <div id="team-filter-section" style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏟️ Team Selection</h3>
+                <div style="display: flex; gap: 4px; margin-bottom: 12px;">
+                    <button class="conference-tab active" data-conference="Eastern" style="flex: 1; padding: 8px 12px; background: #ea580c; color: white; border: 2px solid #ea580c; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                        🌅 Eastern
+                    </button>
+                    <button class="conference-tab" data-conference="Western" style="flex: 1; padding: 8px 12px; background: #f1f5f9; color: #64748b; border: 2px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                        🌄 Western
+                    </button>
+                </div>
+                <div id="team-divisions-container"></div>
+            </div>
+
+            <div id="player-filter-section" style="display: none; margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Player Search</h3>
+                <div style="position: relative; margin-bottom: 16px;">
+                    <input type="text" id="player-search-input" placeholder="Search players..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #f8fafc;">
+                    <div id="player-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
+                </div>
+                <div>
+                    <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">Selected Players</h4>
+                    <div id="selected-players-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                </div>
+            </div>
+
+            <div id="shooters-section" style="display: none; margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🎯 Top 20 Elite Shooters</h3>
+                <div id="top-shooters-list"></div>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">📅 Time Range</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 16px;">
+                    <button class="era-btn" data-era="2004-2008" style="padding: 10px 14px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: #475569;">Early Era (2004-2008)</button>
+                    <button class="era-btn" data-era="2009-2014" style="padding: 10px 14px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: #475569;">Analytics Rise (2009-2014)</button>
+                    <button class="era-btn" data-era="2015-2020" style="padding: 10px 14px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: #475569;">Curry Era (2015-2020)</button>
+                    <button class="era-btn active" data-era="2021-2024" style="padding: 10px 14px; background: #ea580c; color: white; border: 2px solid #ea580c; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500;">Modern NBA (2021-2024)</button>
+                    <button class="era-btn" data-era="2004-2024" style="padding: 10px 14px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: #475569;">Full History</button>
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <div>
+                        <label style="font-weight: 600; color: #ea580c; font-size: 14px;">Start: <span id="start-year-display">2021</span></label>
+                        <input type="range" id="start-year-slider" min="2004" max="2024" value="2021" style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; outline: none; -webkit-appearance: none;">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #ea580c; font-size: 14px;">End: <span id="end-year-display">2024</span></label>
+                        <input type="range" id="end-year-slider" min="2004" max="2024" value="2024" style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; outline: none; -webkit-appearance: none;">
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    createVisualizationAreaHTML() {
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9;">
+                <h2 id="advanced-chart-title" style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0;">Team Three-Point Trends</h2>
+                <div style="display: flex; gap: 12px;">
+                    <div style="display: flex; gap: 6px;">
+                        <button class="chart-option-btn active" data-view="trends" style="padding: 6px 12px; background: #ea580c; color: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">📈 Trends</button>
+                        <button class="chart-option-btn" data-view="comparison" style="padding: 6px 12px; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">⚖️ Compare</button>
+                        <button class="chart-option-btn" data-view="performance" style="padding: 6px 12px; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">📊 Performance</button>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 1; position: relative; overflow: hidden;">
+                <svg id="advanced-main-chart" style="width: 100%; height: 100%; background: #fafbfc; border-radius: 8px;"></svg>
+            </div>
+            <div id="chart-insights" style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+        `;
+    }
+
+    createStatsPanelHTML() {
+        return `
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">📊 Live Statistics</h3>
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ea580c;">
+                    <div>
+                        <div id="selected-count" style="font-size: 18px; font-weight: 700; color: #ea580c;">0</div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 500;">Teams Selected</div>
+                    </div>
+                </div>
+            </div>
             
-            button.on('click', () => {
-                this.currentAnalysis = key;
-                this.updateInterface();
-                this.renderVisualization();
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">📋 Quick Stats</h4>
+                <div id="quick-stats-content"></div>
+            </div>
+            
+            <div style="padding: 16px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-radius: 8px; border: 1px solid #cbd5e1;">
+                <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">🏀 League Context</h4>
+                <div id="league-context-content">
+                    <p style="font-size: 13px; color: #374151; line-height: 1.4; margin: 0;">Select teams or players to see contextual statistics and league rankings.</p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Initialize when needed
+window.nbaAdvancedExplorer = new NBAAdvancedExplorer();// Enhanced NBA Explorer - Additional Functions
+
+// Add these methods to the NBAAdvancedExplorer class
+Object.assign(NBAAdvancedExplorer.prototype, {
+    
+    populateTeamFilters() {
+        const container = document.getElementById('team-divisions-container');
+        const conferences = this.data.team_conferences;
+        this.renderConferenceDivisions(container, conferences['Eastern Conference'], 'Eastern');
+        this.updateSelectedCount();
+    },
+
+    renderConferenceDivisions(container, divisions, conference) {
+        container.innerHTML = `
+            <div id="${conference.toLowerCase()}-divisions" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                ${Object.entries(divisions).map(([divisionName, teams]) => `
+                    <div>
+                        <h4 style="font-size: 12px; font-weight: 600; color: #0f172a; margin: 0 0 8px 0; padding: 6px; background: white; border-radius: 4px; text-align: center;">${divisionName}</h4>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            ${teams.map(team => `
+                                <div class="team-option ${this.selectedTeams.has(team.team) ? 'selected' : ''}" 
+                                     data-team="${team.team}"
+                                     style="padding: 6px 10px; background: white; border: 2px solid ${this.selectedTeams.has(team.team) ? '#ea580c' : 'transparent'}; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s ease; text-align: center; ${this.selectedTeams.has(team.team) ? 'background: #ea580c; color: white;' : ''}">
+                                    ${team.team}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    },
+
+    populateTopShooters() {
+        const container = document.getElementById('top-shooters-list');
+        container.innerHTML = this.topShooters.map((shooter, index) => `
+            <div class="player-card ${this.selectedPlayers.has(shooter.player) ? 'selected' : ''}" 
+                 data-player="${shooter.player}"
+                 style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: ${this.selectedPlayers.has(shooter.player) ? 'linear-gradient(135deg, #ea580c, #dc2626)' : '#f8fafc'}; color: ${this.selectedPlayers.has(shooter.player) ? 'white' : 'black'}; border-radius: 6px; font-size: 12px; font-weight: 500; margin-bottom: 6px; cursor: pointer;">
+                <div>
+                    <strong>#${index + 1} ${shooter.player}</strong>
+                    <div style="font-size: 10px; opacity: 0.8;">
+                        ${shooter.career_three_pt_percentage}% • ${shooter.years_active}
+                    </div>
+                </div>
+                <div style="font-size: 10px;">
+                    ${shooter.career_three_pt_made}/${shooter.career_three_pt_attempts}
+                </div>
+            </div>
+        `).join('');
+    },
+
+    bindEventListeners() {
+        // Analysis type buttons
+        document.querySelectorAll('.analysis-type-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.analysis-type-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = '#f1f5f9';
+                    b.style.color = '#475569';
+                    b.style.border = '2px solid #e2e8f0';
+                });
+                e.target.classList.add('active');
+                e.target.style.background = 'linear-gradient(135deg, #ea580c, #dc2626)';
+                e.target.style.color = 'white';
+                e.target.style.border = '2px solid #ea580c';
+                
+                this.currentView = e.target.dataset.type;
+                this.updateViewSections();
+                this.updateVisualization();
             });
         });
-        
-        // Advanced player selection
-        this.createAdvancedPlayerSelection(controlPanel);
-        
-        // Advanced time controls
-        this.createAdvancedTimeControls(controlPanel);
-        
-        // Metric controls
-        this.createMetricControls(controlPanel);
-    }
-    
-    createAdvancedPlayerSelection(container) {
-        const playerSection = container.append('div')
-            .attr('class', 'control-section');
-        
-        playerSection.append('h3')
-            .text('🏀 Player Selection');
-        
-        // Smart search with autocomplete
-        const searchContainer = playerSection.append('div')
-            .attr('class', 'smart-search-container');
-        
-        const searchInput = searchContainer.append('input')
-            .attr('type', 'text')
-            .attr('placeholder', 'Search players by name, position, or team...')
-            .attr('class', 'smart-search-input');
-        
-        const suggestionsContainer = searchContainer.append('div')
-            .attr('class', 'search-suggestions');
-        
-        // Player categories
-        const categoriesContainer = playerSection.append('div')
-            .attr('class', 'player-categories');
-        
-        const categories = [
-            { key: 'elite_shooters', label: '🎯 Elite Shooters', filter: p => p.career_summary.peak_efficiency > 40 },
-            { key: 'volume_shooters', label: '🔥 Volume Shooters', filter: p => p.career_summary.peak_three_pt_rate > 40 },
-            { key: 'mvp_candidates', label: '👑 MVP Candidates', filter: p => p.seasons.some(s => s.impact_score > 80) },
-            { key: 'rookies', label: '🌟 Rising Stars', filter: p => p.seasons.length <= 3 }
-        ];
-        
-        categories.forEach(category => {
-            const btn = categoriesContainer.append('button')
-                .attr('class', 'category-btn')
-                .text(category.label);
-            
-            btn.on('click', () => {
-                const players = this.data.players.filter(category.filter);
-                this.selectedPlayers = players.slice(0, 5).map(p => p.player);
-                this.updateInterface();
-                this.renderVisualization();
+
+        // Conference tabs
+        document.querySelectorAll('.conference-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.conference-tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.style.background = '#f1f5f9';
+                    t.style.color = '#64748b';
+                    t.style.border = '2px solid #e2e8f0';
+                });
+                e.target.classList.add('active');
+                e.target.style.background = '#ea580c';
+                e.target.style.color = 'white';
+                e.target.style.border = '2px solid #ea580c';
+                
+                const conference = e.target.dataset.conference;
+                const divisions = this.data.team_conferences[conference + ' Conference'];
+                this.renderConferenceDivisions(
+                    document.getElementById('team-divisions-container'), 
+                    divisions, 
+                    conference
+                );
+                this.bindTeamSelectionListeners();
             });
         });
-        
-        // Selected players display
-        this.createSelectedPlayersDisplay(playerSection);
-    }
-    
-    createSelectedPlayersDisplay(container) {
-        const selectedContainer = container.append('div')
-            .attr('class', 'selected-players-container');
-        
-        selectedContainer.append('h4')
-            .text('Selected Players:');
-        
-        const playersGrid = selectedContainer.append('div')
-            .attr('class', 'selected-players-grid')
-            .attr('id', 'selected-players-grid');
-    }
-    
-    createAdvancedTimeControls(container) {
-        const timeSection = container.append('div')
-            .attr('class', 'control-section');
-        
-        timeSection.append('h3')
-            .text('📅 Time Period Analysis');
-        
-        // Era selector
-        const erasContainer = timeSection.append('div')
-            .attr('class', 'eras-container');
-        
-        const eras = [
-            { label: 'Pre-Analytics (2004-2010)', start: 2004, end: 2010 },
-            { label: 'Early Analytics (2011-2015)', start: 2011, end: 2015 },
-            { label: 'Curry Era (2016-2020)', start: 2016, end: 2020 },
-            { label: 'Modern NBA (2021-2024)', start: 2021, end: 2024 },
-            { label: 'Full Timeline', start: 2004, end: 2024 }
-        ];
-        
-        eras.forEach(era => {
-            const btn = erasContainer.append('button')
-                .attr('class', 'era-btn')
-                .text(era.label);
-            
-            btn.on('click', () => {
-                this.timeRange = { start: era.start, end: era.end };
-                this.updateInterface();
-                this.renderVisualization();
+
+        // Initial team selection binding
+        this.bindTeamSelectionListeners();
+
+        // Player search
+        const playerInput = document.getElementById('player-search-input');
+        if (playerInput) {
+            playerInput.addEventListener('input', (e) => {
+                this.handlePlayerSearch(e.target.value);
             });
-        });
-        
-        // Custom range sliders
-        const rangeContainer = timeSection.append('div')
-            .attr('class', 'range-sliders-container');
-        
-        // Start year slider
-        rangeContainer.append('label').text('Start Year:');
-        const startSlider = rangeContainer.append('input')
-            .attr('type', 'range')
-            .attr('min', 2004)
-            .attr('max', 2024)
-            .attr('value', this.timeRange.start)
-            .attr('class', 'year-range-slider');
-        
-        const startLabel = rangeContainer.append('span')
-            .attr('class', 'year-label')
-            .text(this.timeRange.start);
-        
-        startSlider.on('input', () => {
-            this.timeRange.start = parseInt(startSlider.property('value'));
-            startLabel.text(this.timeRange.start);
-            this.renderVisualization();
-        });
-        
-        // End year slider
-        rangeContainer.append('label').text('End Year:');
-        const endSlider = rangeContainer.append('input')
-            .attr('type', 'range')
-            .attr('min', 2004)
-            .attr('max', 2024)
-            .attr('value', this.timeRange.end)
-            .attr('class', 'year-range-slider');
-        
-        const endLabel = rangeContainer.append('span')
-            .attr('class', 'year-label')
-            .text(this.timeRange.end);
-        
-        endSlider.on('input', () => {
-            this.timeRange.end = parseInt(endSlider.property('value'));
-            endLabel.text(this.timeRange.end);
-            this.renderVisualization();
-        });
-    }
-    
-    createMetricControls(container) {
-        const metricSection = container.append('div')
-            .attr('class', 'control-section');
-        
-        metricSection.append('h3')
-            .text('📊 Analysis Metrics');
-        
-        const metricsGrid = metricSection.append('div')
-            .attr('class', 'metrics-grid');
-        
-        const metrics = [
-            { key: 'volume', label: '📈 Volume', desc: 'Shot attempts and frequency' },
-            { key: 'efficiency', label: '🎯 Efficiency', desc: 'Shooting percentages and accuracy' },
-            { key: 'impact', label: '💪 Impact', desc: 'Overall contribution to team success' },
-            { key: 'consistency', label: '⚖️ Consistency', desc: 'Performance stability over time' }
-        ];
-        
-        metrics.forEach(metric => {
-            const card = metricsGrid.append('div')
-                .attr('class', 'metric-card')
-                .attr('data-metric', metric.key);
-            
-            card.append('div')
-                .attr('class', 'metric-icon')
-                .text(metric.label);
-            
-            card.append('div')
-                .attr('class', 'metric-desc')
-                .text(metric.desc);
-            
-            card.on('click', () => {
-                // Toggle metric selection logic
-                this.renderVisualization();
-            });
-        });
-    }
-    
-    createAdvancedVisualizationArea(container) {
-        const vizArea = container.append('div')
-            .attr('class', 'advanced-visualization-area');
-        
-        // Chart header with controls
-        const chartHeader = vizArea.append('div')
-            .attr('class', 'chart-header');
-        
-        const chartTitle = chartHeader.append('h2')
-            .attr('id', 'advanced-chart-title')
-            .text('Player Performance Evolution');
-        
-        const chartControls = chartHeader.append('div')
-            .attr('class', 'chart-controls');
-        
-        // Chart options
-        const optionsContainer = chartControls.append('div')
-            .attr('class', 'chart-options');
-        
-        ['line', 'area', 'scatter', 'heatmap'].forEach(type => {
-            optionsContainer.append('button')
-                .attr('class', 'chart-option-btn')
-                .attr('data-chart-type', type)
-                .text(type.charAt(0).toUpperCase() + type.slice(1));
-        });
-        
-        // Export controls
-        const exportContainer = chartControls.append('div')
-            .attr('class', 'export-controls');
-        
-        exportContainer.append('button')
-            .attr('class', 'export-btn')
-            .text('📊 Export PNG')
-            .on('click', () => this.exportChart('png'));
-        
-        exportContainer.append('button')
-            .attr('class', 'export-btn')
-            .text('📈 Export SVG')
-            .on('click', () => this.exportChart('svg'));
-        
-        // Main chart container
-        const chartContainer = vizArea.append('div')
-            .attr('class', 'main-chart-container');
-        
-        chartContainer.append('svg')
-            .attr('id', 'advanced-main-chart')
-            .attr('width', this.chartDimensions.width)
-            .attr('height', this.chartDimensions.height);
-        
-        // Chart insights panel
-        chartContainer.append('div')
-            .attr('class', 'chart-insights')
-            .attr('id', 'chart-insights');
-    }
-    
-    createAdvancedStatsPanel(container) {
-        const statsPanel = container.append('div')
-            .attr('class', 'advanced-stats-panel');
-        
-        statsPanel.append('h3')
-            .text('📊 Advanced Analytics');
-        
-        // Real-time statistics
-        const realtimeStats = statsPanel.append('div')
-            .attr('class', 'realtime-stats')
-            .attr('id', 'realtime-stats');
-        
-        // Comparison matrix
-        const comparisonMatrix = statsPanel.append('div')
-            .attr('class', 'comparison-matrix')
-            .attr('id', 'comparison-matrix');
-        
-        // League context
-        const leagueContext = statsPanel.append('div')
-            .attr('class', 'league-context')
-            .attr('id', 'league-context');
-    }
-    
-    updateInterface() {
-        // Update all interface elements based on current state
-        this.updateSelectedPlayersDisplay();
-        this.updateChartTitle();
-        this.updateActiveButtons();
-    }
-    
-    updateSelectedPlayersDisplay() {
-        const container = d3.select('#selected-players-grid');
-        
-        // Clear existing
-        container.selectAll('*').remove();
-        
-        // Add selected players
-        const playerCards = container.selectAll('.player-card')
-            .data(this.selectedPlayers)
-            .enter()
-            .append('div')
-            .attr('class', 'player-card');
-        
-        playerCards.append('span')
-            .attr('class', 'player-name')
-            .text(d => d);
-        
-        playerCards.append('button')
-            .attr('class', 'remove-player-btn')
-            .text('×')
-            .on('click', (event, d) => {
-                this.selectedPlayers = this.selectedPlayers.filter(p => p !== d);
-                this.updateInterface();
-                this.renderVisualization();
-            });
-    }
-    
-    updateChartTitle() {
-        d3.select('#advanced-chart-title')
-            .text(this.chartTypes[this.currentAnalysis] || 'Advanced Analysis');
-    }
-    
-    updateActiveButtons() {
-        // Update analysis type buttons
-        d3.selectAll('.analysis-type-btn')
-            .classed('active', false);
-        
-        d3.select(`[data-analysis="${this.currentAnalysis}"]`)
-            .classed('active', true);
-    }
-    
-    renderVisualization() {
-        console.log(`🎨 Rendering ${this.currentAnalysis} visualization...`);
-        
-        // Clear previous chart
-        d3.select('#advanced-main-chart').selectAll('*').remove();
-        
-        // Route to appropriate visualization method
-        switch (this.currentAnalysis) {
-            case 'player_evolution':
-                this.renderPlayerEvolution();
-                break;
-            case 'player_comparison':
-                this.renderPlayerComparison();
-                break;
-            case 'team_evolution':
-                this.renderTeamEvolution();
-                break;
-            case 'league_analysis':
-                this.renderLeagueAnalysis();
-                break;
-            case 'shot_distribution':
-                this.renderShotDistribution();
-                break;
-            case 'efficiency_matrix':
-                this.renderEfficiencyMatrix();
-                break;
-            case 'trend_correlation':
-                this.renderTrendCorrelation();
-                break;
-            case 'performance_radar':
-                this.renderPerformanceRadar();
-                break;
-            default:
-                this.renderPlayerEvolution();
         }
+
+        // Top shooters selection
+        this.bindShooterSelectionListeners();
+
+        // Era buttons
+        document.querySelectorAll('.era-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.era-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = '#f8fafc';
+                    b.style.color = '#475569';
+                    b.style.border = '2px solid #e2e8f0';
+                });
+                e.target.classList.add('active');
+                e.target.style.background = '#ea580c';
+                e.target.style.color = 'white';
+                e.target.style.border = '2px solid #ea580c';
+                
+                const [start, end] = e.target.dataset.era.split('-').map(Number);
+                this.timeRange = { start, end };
+                
+                document.getElementById('start-year-slider').value = start;
+                document.getElementById('end-year-slider').value = end;
+                document.getElementById('start-year-display').textContent = start;
+                document.getElementById('end-year-display').textContent = end;
+                
+                this.updateVisualization();
+            });
+        });
+
+        // Year sliders
+        ['start', 'end'].forEach(type => {
+            const slider = document.getElementById(`${type}-year-slider`);
+            const display = document.getElementById(`${type}-year-display`);
+            
+            if (slider && display) {
+                slider.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    display.textContent = value;
+                    this.timeRange[type] = value;
+                    this.updateVisualization();
+                });
+            }
+        });
+
+        // Chart view buttons
+        document.querySelectorAll('.chart-option-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.chart-option-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = '#f1f5f9';
+                    b.style.color = '#64748b';
+                });
+                e.target.classList.add('active');
+                e.target.style.background = '#ea580c';
+                e.target.style.color = 'white';
+                this.updateVisualization();
+            });
+        });
+    },
+
+    bindTeamSelectionListeners() {
+        document.querySelectorAll('.team-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const team = e.target.dataset.team;
+                
+                if (this.selectedTeams.has(team)) {
+                    this.selectedTeams.delete(team);
+                    e.target.classList.remove('selected');
+                    e.target.style.background = 'white';
+                    e.target.style.color = 'black';
+                    e.target.style.border = '2px solid transparent';
+                } else {
+                    this.selectedTeams.add(team);
+                    e.target.classList.add('selected');
+                    e.target.style.background = '#ea580c';
+                    e.target.style.color = 'white';
+                    e.target.style.border = '2px solid #ea580c';
+                }
+                
+                this.updateSelectedCount();
+                this.updateVisualization();
+            });
+        });
+    },
+
+    bindShooterSelectionListeners() {
+        document.querySelectorAll('.player-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const player = e.currentTarget.dataset.player;
+                
+                if (this.selectedPlayers.has(player)) {
+                    this.selectedPlayers.delete(player);
+                    e.currentTarget.classList.remove('selected');
+                    e.currentTarget.style.background = '#f8fafc';
+                    e.currentTarget.style.color = 'black';
+                } else {
+                    this.selectedPlayers.add(player);
+                    e.currentTarget.classList.add('selected');
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ea580c, #dc2626)';
+                    e.currentTarget.style.color = 'white';
+                }
+                
+                this.updateSelectedPlayersDisplay();
+                this.updateVisualization();
+            });
+        });
+    },
+
+    updateViewSections() {
+        const sections = {
+            'team-filter-section': this.currentView === 'teams',
+            'player-filter-section': this.currentView === 'players',
+            'shooters-section': this.currentView === 'shooters'
+        };
+
+        Object.entries(sections).forEach(([id, show]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.display = show ? 'block' : 'none';
+            }
+        });
+
+        // Update chart title
+        const titles = {
+            'teams': 'Team Three-Point Trends',
+            'players': 'Player Comparison Analysis',
+            'shooters': 'Elite Shooter Performance'
+        };
         
-        // Update statistics panel
-        this.updateStatisticsPanel();
+        document.getElementById('advanced-chart-title').textContent = titles[this.currentView];
+    },
+
+    updateSelectedCount() {
+        const count = this.currentView === 'teams' ? this.selectedTeams.size : this.selectedPlayers.size;
+        const label = this.currentView === 'teams' ? 'Teams Selected' : 'Players Selected';
         
-        // Update insights
-        this.updateInsights();
+        document.getElementById('selected-count').textContent = count;
+        document.querySelector('#selected-count').nextElementSibling.textContent = label;
+    },
+
+    updateSelectedPlayersDisplay() {
+        const container = document.getElementById('selected-players-list');
+        if (!container) return;
+
+        container.innerHTML = Array.from(this.selectedPlayers).map(player => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: linear-gradient(135deg, #ea580c, #dc2626); color: white; border-radius: 6px; font-size: 12px; font-weight: 500;">
+                <span>${player}</span>
+                <button class="remove-player-btn" data-player="${player}" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 14px; line-height: 1;">×</button>
+            </div>
+        `).join('');
+
+        // Bind remove buttons
+        container.querySelectorAll('.remove-player-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const player = e.target.dataset.player;
+                this.selectedPlayers.delete(player);
+                this.updateSelectedPlayersDisplay();
+                this.updateVisualization();
+                
+                // Update top shooters list
+                document.querySelectorAll('.player-card').forEach(card => {
+                    if (card.dataset.player === player) {
+                        card.classList.remove('selected');
+                        card.style.background = '#f8fafc';
+                        card.style.color = 'black';
+                    }
+                });
+            });
+        });
+    },
+
+    handlePlayerSearch(query) {
+        const suggestions = document.getElementById('player-suggestions');
+        if (!suggestions) return;
+
+        if (query.length < 2) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        const matchingPlayers = this.data.player_data
+            .filter(p => p.player.toLowerCase().includes(query.toLowerCase()))
+            .slice(0, 10);
+
+        if (matchingPlayers.length > 0) {
+            suggestions.innerHTML = matchingPlayers.map(player => `
+                <div style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s ease;" 
+                     onmouseover="this.style.background='#f1f5f9'" 
+                     onmouseout="this.style.background='white'"
+                     onclick="window.nbaAdvancedExplorer.selectPlayerFromSearch('${player.player}')">
+                    ${player.player}
+                </div>
+            `).join('');
+            suggestions.style.display = 'block';
+        } else {
+            suggestions.style.display = 'none';
+        }
+    },
+
+    selectPlayerFromSearch(playerName) {
+        this.selectedPlayers.add(playerName);
+        this.updateSelectedPlayersDisplay();
+        this.updateVisualization();
+        
+        document.getElementById('player-search-input').value = '';
+        document.getElementById('player-suggestions').style.display = 'none';
+    },
+
+    showError(message) {
+        const container = document.querySelector('.advanced-visualization-area') || 
+                         document.getElementById('explorer-dashboard');
+        container.innerHTML = `
+            <div style="background: #fee2e2; color: #991b1b; padding: 20px; border-radius: 8px; border: 1px solid #fca5a5; text-align: center;">
+                <h2 style="margin: 0 0 12px 0; font-size: 18px;">Error</h2>
+                <p style="margin: 0 0 16px 0; font-size: 14px;">${message}</p>
+                <button onclick="location.reload()" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">Refresh Page</button>
+            </div>
+        `;
     }
+});
+
+// Export for use
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { NBAAdvancedExplorer };
+}// Enhanced NBA Explorer - Visualization Functions
+
+// Add visualization methods to the NBAAdvancedExplorer class
+Object.assign(NBAAdvancedExplorer.prototype, {
     
-    renderPlayerEvolution() {
+    updateVisualization() {
         const svg = d3.select('#advanced-main-chart');
-        const margin = { top: 40, right: 120, bottom: 60, left: 80 };
-        const width = this.chartDimensions.width - margin.left - margin.right;
-        const height = this.chartDimensions.height - margin.top - margin.bottom;
-        
+        svg.selectAll('*').remove();
+
+        const container = svg.node().parentElement;
+        const width = container.clientWidth - 40;
+        const height = container.clientHeight - 40;
+
+        svg.attr('width', width).attr('height', height);
+
+        const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
         const g = svg.append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
-        
-        // Filter data for selected players and time range
-        const filteredData = this.selectedPlayers.map(playerName => {
-            const player = this.data.players.find(p => p.player === playerName);
-            if (!player) return null;
-            
-            const seasons = player.seasons.filter(s => 
-                s.season >= this.timeRange.start && s.season <= this.timeRange.end
-            );
-            
-            return { player: playerName, seasons };
-        }).filter(d => d && d.seasons.length > 0);
-        
-        if (filteredData.length === 0) {
+
+        switch (this.currentView) {
+            case 'teams':
+                this.drawTeamTrends(g, chartWidth, chartHeight);
+                break;
+            case 'players':
+                this.drawPlayerComparison(g, chartWidth, chartHeight);
+                break;
+            case 'shooters':
+                this.drawShooterAnalysis(g, chartWidth, chartHeight);
+                break;
+        }
+
+        this.updateInsights();
+        this.updateQuickStats();
+    },
+
+    drawTeamTrends(g, width, height) {
+        if (this.selectedTeams.size === 0) {
             g.append('text')
                 .attr('x', width / 2)
                 .attr('y', height / 2)
                 .attr('text-anchor', 'middle')
-                .style('font-size', '18px')
+                .style('font-size', '16px')
                 .style('fill', '#64748b')
-                .text('No data available for selected players and time range');
+                .text('Select teams from the left panel to view trends');
             return;
         }
-        
-        // Create scales
-        const allSeasons = filteredData.flatMap(d => d.seasons);
+
+        const selectedTeamData = this.data.team_data.filter(team => 
+            this.selectedTeams.has(team.team)
+        );
+
+        const allSeasons = [];
+        selectedTeamData.forEach(team => {
+            team.seasons.forEach(season => {
+                if (season.year >= this.timeRange.start && season.year <= this.timeRange.end) {
+                    allSeasons.push({
+                        ...season,
+                        team: team.team
+                    });
+                }
+            });
+        });
+
+        if (allSeasons.length === 0) {
+            g.append('text')
+                .attr('x', width / 2)
+                .attr('y', height / 2)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('fill', '#64748b')
+                .text('No data available for selected time range');
+            return;
+        }
+
+        // Scales
         const xScale = d3.scaleLinear()
-            .domain(d3.extent(allSeasons, d => d.season))
+            .domain([this.timeRange.start, this.timeRange.end])
             .range([0, width]);
-        
+
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(allSeasons, d => d.three_pt_rate) * 1.1])
+            .domain([0, d3.max(allSeasons, d => d.three_pt_attempts)])
             .range([height, 0]);
-        
+
         const colorScale = d3.scaleOrdinal()
-            .domain(this.selectedPlayers)
-            .range(this.colors.primary);
-        
+            .domain(Array.from(this.selectedTeams))
+            .range(['#ea580c', '#1e40af', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#be185d']);
+
         // Add grid
-        const xGrid = g.append('g')
+        g.append('g')
             .attr('class', 'grid')
             .attr('transform', `translate(0,${height})`)
             .call(d3.axisBottom(xScale)
                 .tickSize(-height)
                 .tickFormat('')
-            );
-        
-        const yGrid = g.append('g')
+            )
+            .style('stroke-dasharray', '2,2')
+            .style('opacity', 0.3);
+
+        g.append('g')
             .attr('class', 'grid')
             .call(d3.axisLeft(yScale)
                 .tickSize(-width)
                 .tickFormat('')
-            );
-        
-        xGrid.selectAll('line')
-            .style('stroke', this.colors.grid)
-            .style('stroke-width', 1);
-        
-        yGrid.selectAll('line')
-            .style('stroke', this.colors.grid)
-            .style('stroke-width', 1);
-        
-        // Create line generator
-        const line = d3.line()
-            .x(d => xScale(d.season))
-            .y(d => yScale(d.three_pt_rate))
-            .curve(d3.curveMonotoneX);
-        
-        // Add lines for each player
-        filteredData.forEach((player, index) => {
-            const playerGroup = g.append('g')
-                .attr('class', `player-group player-${index}`);
-            
-            // Line path
-            const path = playerGroup.append('path')
-                .datum(player.seasons)
-                .attr('class', 'evolution-line')
-                .attr('d', line)
-                .style('fill', 'none')
-                .style('stroke', colorScale(player.player))
-                .style('stroke-width', 3)
-                .style('opacity', 0.8);
-            
-            // Animate line drawing
-            const totalLength = path.node().getTotalLength();
-            path.attr('stroke-dasharray', totalLength + ' ' + totalLength)
-                .attr('stroke-dashoffset', totalLength)
-                .transition()
-                .duration(this.animationDuration)
-                .delay(index * 200)
-                .attr('stroke-dashoffset', 0);
-            
-            // Add points
-            const points = playerGroup.selectAll('.evolution-point')
-                .data(player.seasons)
-                .enter()
-                .append('circle')
-                .attr('class', 'evolution-point')
-                .attr('cx', d => xScale(d.season))
-                .attr('cy', d => yScale(d.three_pt_rate))
-                .attr('r', 0)
-                .style('fill', colorScale(player.player))
-                .style('stroke', 'white')
-                .style('stroke-width', 2);
-            
-            // Animate points
-            points.transition()
-                .duration(300)
-                .delay((d, i) => (index * 200) + i * 50 + this.animationDuration)
-                .attr('r', 5);
-            
-            // Add hover interactions
-            points.on('mouseover', (event, d) => {
-                this.showAdvancedTooltip(event, d, player.player);
-            })
-            .on('mouseout', () => {
-                this.hideAdvancedTooltip();
-            });
-        });
-        
-        // Add axes
+            )
+            .style('stroke-dasharray', '2,2')
+            .style('opacity', 0.3);
+
+        // Axes
         g.append('g')
-            .attr('class', 'x-axis')
             .attr('transform', `translate(0,${height})`)
             .call(d3.axisBottom(xScale).tickFormat(d3.format('d')))
             .style('font-size', '12px');
-        
+
         g.append('g')
-            .attr('class', 'y-axis')
-            .call(d3.axisLeft(yScale))
+            .call(d3.axisLeft(yScale).tickFormat(d => d.toLocaleString()))
             .style('font-size', '12px');
-        
-        // Add axis labels
+
+        // Lines for each team
+        const line = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.three_pt_attempts))
+            .curve(d3.curveMonotoneX);
+
+        selectedTeamData.forEach((team, index) => {
+            const teamSeasons = team.seasons.filter(s => 
+                s.year >= this.timeRange.start && s.year <= this.timeRange.end
+            );
+
+            if (teamSeasons.length === 0) return;
+
+            // Draw line
+            g.append('path')
+                .datum(teamSeasons)
+                .attr('fill', 'none')
+                .attr('stroke', colorScale(team.team))
+                .attr('stroke-width', 3)
+                .attr('d', line)
+                .style('opacity', 0.8);
+
+            // Add points
+            g.selectAll(`.points-${index}`)
+                .data(teamSeasons)
+                .enter()
+                .append('circle')
+                .attr('cx', d => xScale(d.year))
+                .attr('cy', d => yScale(d.three_pt_attempts))
+                .attr('r', 4)
+                .attr('fill', colorScale(team.team))
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', (event, d) => {
+                    this.showAdvancedTooltip(event, `
+                        <strong>${team.team} - ${d.year}</strong><br/>
+                        3PT Attempts: ${d.three_pt_attempts?.toLocaleString() || 'N/A'}<br/>
+                        3PT Made: ${d.three_pt_made?.toLocaleString() || 'N/A'}<br/>
+                        3PT %: ${d.three_pt_percentage || 'N/A'}%
+                    `);
+                })
+                .on('mouseout', this.hideAdvancedTooltip);
+        });
+
+        // Legend
+        const legend = g.append('g')
+            .attr('transform', `translate(${width - 150}, 20)`);
+
+        selectedTeamData.forEach((team, index) => {
+            const legendItem = legend.append('g')
+                .attr('transform', `translate(0, ${index * 20})`);
+
+            legendItem.append('line')
+                .attr('x1', 0)
+                .attr('x2', 15)
+                .attr('y1', 0)
+                .attr('y2', 0)
+                .attr('stroke', colorScale(team.team))
+                .attr('stroke-width', 3);
+
+            legendItem.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .style('font-size', '11px')
+                .style('font-weight', '500')
+                .text(team.team.length > 15 ? team.team.substring(0, 15) + '...' : team.team);
+        });
+
+        // Axis labels
         g.append('text')
             .attr('x', width / 2)
-            .attr('y', height + 45)
+            .attr('y', height + 35)
             .attr('text-anchor', 'middle')
             .style('font-size', '14px')
-            .style('font-weight', '600')
+            .style('font-weight', '500')
             .text('Season');
-        
+
         g.append('text')
             .attr('transform', 'rotate(-90)')
             .attr('x', -height / 2)
-            .attr('y', -50)
+            .attr('y', -40)
             .attr('text-anchor', 'middle')
             .style('font-size', '14px')
-            .style('font-weight', '600')
-            .text('Three-Point Rate (%)');
-        
-        // Add legend
-        this.addAdvancedLegend(svg, colorScale, filteredData);
-        
-        // Add benchmark lines
-        this.addBenchmarkLines(g, yScale, width);
-    }
-    
-    addAdvancedLegend(svg, colorScale, data) {
-        const legend = svg.append('g')
-            .attr('class', 'advanced-legend')
-            .attr('transform', `translate(${this.chartDimensions.width - 100}, 60)`);
-        
-        const legendItems = legend.selectAll('.legend-item')
-            .data(data)
-            .enter()
-            .append('g')
-            .attr('class', 'legend-item')
-            .attr('transform', (d, i) => `translate(0, ${i * 25})`);
-        
-        legendItems.append('line')
-            .attr('x1', 0)
-            .attr('x2', 20)
-            .attr('y1', 0)
-            .attr('y2', 0)
-            .style('stroke', d => colorScale(d.player))
-            .style('stroke-width', 3);
-        
-        legendItems.append('text')
-            .attr('x', 25)
-            .attr('y', 5)
-            .style('font-size', '12px')
             .style('font-weight', '500')
-            .text(d => d.player);
-    }
-    
-    addBenchmarkLines(g, yScale, width) {
-        const benchmarks = [
-            { value: 35, label: 'Elite Threshold', color: '#16a34a' },
-            { value: 30, label: 'League Average', color: '#f59e0b' },
-            { value: 25, label: 'Below Average', color: '#dc2626' }
-        ];
-        
-        benchmarks.forEach(benchmark => {
-            const line = g.append('line')
-                .attr('x1', 0)
-                .attr('x2', width)
-                .attr('y1', yScale(benchmark.value))
-                .attr('y2', yScale(benchmark.value))
-                .style('stroke', benchmark.color)
-                .style('stroke-dasharray', '5,5')
-                .style('opacity', 0.6);
-            
+            .text('Three-Point Attempts');
+    },
+
+    drawPlayerComparison(g, width, height) {
+        if (this.selectedPlayers.size === 0) {
             g.append('text')
-                .attr('x', width - 5)
-                .attr('y', yScale(benchmark.value) - 5)
-                .attr('text-anchor', 'end')
-                .style('font-size', '10px')
-                .style('fill', benchmark.color)
-                .text(benchmark.label);
+                .attr('x', width / 2)
+                .attr('y', height / 2)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('fill', '#64748b')
+                .text('Select players to compare their three-point evolution');
+            return;
+        }
+
+        const selectedPlayerData = Array.from(this.selectedPlayers).map(playerName => {
+            return this.data.player_data.find(p => p.player === playerName);
+        }).filter(Boolean);
+
+        if (selectedPlayerData.length === 0) {
+            g.append('text')
+                .attr('x', width / 2)
+                .attr('y', height / 2)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('fill', '#64748b')
+                .text('Selected players not found in dataset');
+            return;
+        }
+
+        const allSeasons = [];
+        selectedPlayerData.forEach(player => {
+            player.seasons.forEach(season => {
+                if (season.year >= this.timeRange.start && season.year <= this.timeRange.end) {
+                    allSeasons.push({
+                        ...season,
+                        player: player.player
+                    });
+                }
+            });
         });
-    }
-    
-    // Additional visualization methods would go here...
-    renderPlayerComparison() {
-        // Multi-dimensional player comparison radar chart
-        console.log('Rendering player comparison...');
-    }
-    
-    renderTeamEvolution() {
-        // Team strategy evolution over time
-        console.log('Rendering team evolution...');
-    }
-    
-    renderLeagueAnalysis() {
-        // League-wide trend analysis
-        console.log('Rendering league analysis...');
-    }
-    
-    renderShotDistribution() {
-        // Shot distribution heatmaps and density plots
-        console.log('Rendering shot distribution...');
-    }
-    
-    renderEfficiencyMatrix() {
-        // Efficiency vs volume matrix scatter plot
-        console.log('Rendering efficiency matrix...');
-    }
-    
-    renderTrendCorrelation() {
-        // Correlation analysis between different metrics
-        console.log('Rendering trend correlation...');
-    }
-    
-    renderPerformanceRadar() {
-        // Multi-metric radar charts
-        console.log('Rendering performance radar...');
-    }
-    
-    showAdvancedTooltip(event, data, playerName) {
-        const tooltip = d3.select('body').append('div')
+
+        if (allSeasons.length === 0) return;
+
+        // Scales
+        const xScale = d3.scaleLinear()
+            .domain([this.timeRange.start, this.timeRange.end])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(allSeasons, d => d.three_pt_percentage || 0)])
+            .range([height, 0]);
+
+        const colorScale = d3.scaleOrdinal()
+            .domain(Array.from(this.selectedPlayers))
+            .range(['#ea580c', '#1e40af', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#be185d']);
+
+        // Add grid
+        g.append('g')
+            .attr('class', 'grid')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).tickSize(-height).tickFormat(''))
+            .style('stroke-dasharray', '2,2')
+            .style('opacity', 0.3);
+
+        g.append('g')
+            .attr('class', 'grid')
+            .call(d3.axisLeft(yScale).tickSize(-width).tickFormat(''))
+            .style('stroke-dasharray', '2,2')
+            .style('opacity', 0.3);
+
+        // Axes
+        g.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
+
+        g.append('g')
+            .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+
+        // Lines for each player
+        const line = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.three_pt_percentage || 0))
+            .curve(d3.curveMonotoneX);
+
+        selectedPlayerData.forEach((player, index) => {
+            const playerSeasons = player.seasons.filter(s => 
+                s.year >= this.timeRange.start && s.year <= this.timeRange.end
+            );
+
+            if (playerSeasons.length === 0) return;
+
+            // Draw line
+            g.append('path')
+                .datum(playerSeasons)
+                .attr('fill', 'none')
+                .attr('stroke', colorScale(player.player))
+                .attr('stroke-width', 3)
+                .attr('d', line)
+                .style('opacity', 0.8);
+
+            // Add points
+            g.selectAll(`.player-points-${index}`)
+                .data(playerSeasons)
+                .enter()
+                .append('circle')
+                .attr('cx', d => xScale(d.year))
+                .attr('cy', d => yScale(d.three_pt_percentage || 0))
+                .attr('r', 4)
+                .attr('fill', colorScale(player.player))
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', (event, d) => {
+                    this.showAdvancedTooltip(event, `
+                        <strong>${player.player} - ${d.year}</strong><br/>
+                        3PT%: ${d.three_pt_percentage || 'N/A'}%<br/>
+                        Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_attempts || 'N/A'}<br/>
+                        Team: ${d.team || 'N/A'}
+                    `);
+                })
+                .on('mouseout', this.hideAdvancedTooltip);
+        });
+
+        // Legend
+        const legend = g.append('g')
+            .attr('transform', `translate(${width - 150}, 20)`);
+
+        selectedPlayerData.forEach((player, index) => {
+            const legendItem = legend.append('g')
+                .attr('transform', `translate(0, ${index * 20})`);
+
+            legendItem.append('line')
+                .attr('x1', 0)
+                .attr('x2', 15)
+                .attr('y1', 0)
+                .attr('y2', 0)
+                .attr('stroke', colorScale(player.player))
+                .attr('stroke-width', 3);
+
+            legendItem.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .style('font-size', '11px')
+                .style('font-weight', '500')
+                .text(player.player.length > 15 ? player.player.substring(0, 15) + '...' : player.player);
+        });
+
+        // Axis labels
+        g.append('text')
+            .attr('x', width / 2)
+            .attr('y', height + 35)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', '500')
+            .text('Season');
+
+        g.append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('x', -height / 2)
+            .attr('y', -40)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', '500')
+            .text('Three-Point Percentage');
+    },
+
+    drawShooterAnalysis(g, width, height) {
+        const displayShooters = this.selectedPlayers.size > 0 ? 
+            this.topShooters.filter(s => this.selectedPlayers.has(s.player)) :
+            this.topShooters.slice(0, 10);
+
+        if (displayShooters.length === 0) {
+            g.append('text')
+                .attr('x', width / 2)
+                .attr('y', height / 2)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('fill', '#64748b')
+                .text('Top 10 three-point shooters shown by default');
+            return;
+        }
+
+        const xScale = d3.scaleBand()
+            .domain(displayShooters.map(d => d.player))
+            .range([0, width])
+            .padding(0.2);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, 50])
+            .range([height, 0]);
+
+        // Bars
+        g.selectAll('.shooter-bar')
+            .data(displayShooters)
+            .enter()
+            .append('rect')
+            .attr('class', 'shooter-bar')
+            .attr('x', d => xScale(d.player))
+            .attr('y', d => yScale(d.career_three_pt_percentage))
+            .attr('width', xScale.bandwidth())
+            .attr('height', d => height - yScale(d.career_three_pt_percentage))
+            .attr('fill', this.colors.primary)
+            .attr('rx', 3)
+            .style('opacity', 0.8)
+            .style('cursor', 'pointer')
+            .on('mouseover', (event, d) => {
+                this.showAdvancedTooltip(event, `
+                    <strong>${d.player}</strong><br/>
+                    Career 3PT%: ${d.career_three_pt_percentage}%<br/>
+                    Made/Attempts: ${d.career_three_pt_made}/${d.career_three_pt_attempts}<br/>
+                    Active: ${d.years_active}<br/>
+                    Seasons: ${d.seasons_played}
+                `);
+            })
+            .on('mouseout', this.hideAdvancedTooltip);
+
+        // Percentage labels on bars
+        g.selectAll('.percentage-label')
+            .data(displayShooters)
+            .enter()
+            .append('text')
+            .attr('class', 'percentage-label')
+            .attr('x', d => xScale(d.player) + xScale.bandwidth() / 2)
+            .attr('y', d => yScale(d.career_three_pt_percentage) - 5)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '11px')
+            .style('font-weight', '600')
+            .style('fill', this.colors.primary)
+            .text(d => d.career_three_pt_percentage + '%');
+
+        // Axes
+        g.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(xScale))
+            .selectAll('text')
+            .style('font-size', '10px')
+            .attr('transform', 'rotate(-45)')
+            .style('text-anchor', 'end');
+
+        g.append('g')
+            .call(d3.axisLeft(yScale).tickFormat(d => d + '%'));
+
+        // Axis labels
+        g.append('text')
+            .attr('x', width / 2)
+            .attr('y', height + 35)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', '500')
+            .text('Players');
+
+        g.append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('x', -height / 2)
+            .attr('y', -40)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', '500')
+            .text('Career Three-Point Percentage');
+    },
+
+    updateInsights() {
+        const container = document.getElementById('chart-insights');
+        const insights = this.generateInsights();
+        
+        container.innerHTML = insights.map(insight => `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 16px; width: 20px; text-align: center;">${insight.icon}</div>
+                <div style="font-size: 13px; color: #374151; line-height: 1.4;">${insight.text}</div>
+            </div>
+        `).join('');
+    },
+
+    updateQuickStats() {
+        const container = document.getElementById('quick-stats-content');
+        const stats = this.generateQuickStats();
+        
+        container.innerHTML = stats.map(stat => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8fafc; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #ea580c;">
+                <div style="font-size: 11px; color: #64748b; font-weight: 500;">${stat.label}</div>
+                <div style="font-size: 14px; font-weight: 700; color: #ea580c;">${stat.value}</div>
+            </div>
+        `).join('');
+    },
+
+    generateInsights() {
+        const insights = [];
+        
+        if (this.currentView === 'teams' && this.selectedTeams.size > 0) {
+            insights.push({
+                icon: '📈',
+                text: `Analyzing ${this.selectedTeams.size} teams over ${this.timeRange.end - this.timeRange.start + 1} seasons`
+            });
+        }
+        
+        if (this.selectedPlayers.size > 0) {
+            insights.push({
+                icon: '🏀',
+                text: `Comparing ${this.selectedPlayers.size} elite shooters from the analysis`
+            });
+        }
+        
+        insights.push({
+            icon: '🎯',
+            text: `Three-point attempts have increased by over 140% since 2004`
+        });
+        
+        insights.push({
+            icon: '📊',
+            text: `Use the time range controls to focus on specific eras of basketball evolution`
+        });
+        
+        return insights;
+    },
+
+    generateQuickStats() {
+        const stats = [];
+        
+        if (this.currentView === 'teams') {
+            stats.push({
+                label: 'Teams Selected',
+                value: this.selectedTeams.size
+            });
+            stats.push({
+                label: 'Years Analyzed',
+                value: this.timeRange.end - this.timeRange.start + 1
+            });
+        } else if (this.currentView === 'players') {
+            stats.push({
+                label: 'Players Selected',
+                value: this.selectedPlayers.size
+            });
+        } else if (this.currentView === 'shooters') {
+            const selected = this.selectedPlayers.size;
+            const showing = selected > 0 ? selected : 10;
+            stats.push({
+                label: 'Shooters Shown',
+                value: showing
+            });
+            
+            if (this.topShooters.length > 0) {
+                stats.push({
+                    label: 'Top Shooter',
+                    value: this.topShooters[0].career_three_pt_percentage + '%'
+                });
+            }
+        }
+        
+        return stats;
+    },
+
+    showAdvancedTooltip(event, content) {
+        const tooltip = d3.select('body').selectAll('.advanced-tooltip')
+            .data([0])
+            .join('div')
             .attr('class', 'advanced-tooltip')
             .style('position', 'absolute')
-            .style('background', 'rgba(15, 23, 42, 0.95)')
+            .style('background', '#0f172a')
             .style('color', 'white')
-            .style('padding', '12px')
-            .style('border-radius', '8px')
+            .style('padding', '8px 12px')
+            .style('border-radius', '6px')
             .style('font-size', '12px')
-            .style('box-shadow', '0 4px 12px rgba(0,0,0,0.15)')
+            .style('font-weight', '500')
             .style('pointer-events', 'none')
+            .style('z-index', '10000')
+            .style('max-width', '250px')
+            .style('box-shadow', '0 4px 20px rgba(0, 0, 0, 0.3)')
             .style('opacity', 0);
-        
-        tooltip.html(`
-            <div style="font-weight: 600; margin-bottom: 8px;">${playerName}</div>
-            <div><strong>Season:</strong> ${data.season}</div>
-            <div><strong>3PT Rate:</strong> ${data.three_pt_rate.toFixed(1)}%</div>
-            <div><strong>3PT %:</strong> ${data.three_pt_percentage?.toFixed(1) || 'N/A'}%</div>
-            <div><strong>Made 3s:</strong> ${data.made_threes || 'N/A'}</div>
-            <div><strong>Impact Score:</strong> ${data.impact_score?.toFixed(1) || 'N/A'}</div>
-        `);
-        
-        tooltip.style('left', (event.pageX + 10) + 'px')
+
+        tooltip.html(content)
+            .style('left', (event.pageX + 10) + 'px')
             .style('top', (event.pageY - 10) + 'px')
             .transition()
             .duration(200)
             .style('opacity', 1);
-    }
-    
-    hideAdvancedTooltip() {
-        d3.selectAll('.advanced-tooltip').remove();
-    }
-    
-    updateStatisticsPanel() {
-        const statsContainer = d3.select('#realtime-stats');
-        statsContainer.selectAll('*').remove();
-        
-        // Calculate real-time statistics for selected players
-        const stats = this.calculateRealTimeStats();
-        
-        const statCards = statsContainer.selectAll('.stat-card')
-            .data(stats)
-            .enter()
-            .append('div')
-            .attr('class', 'stat-card');
-        
-        statCards.append('div')
-            .attr('class', 'stat-value')
-            .text(d => d.value);
-        
-        statCards.append('div')
-            .attr('class', 'stat-label')
-            .text(d => d.label);
-    }
-    
-    calculateRealTimeStats() {
-        // Calculate statistics based on current selection
-        const selectedData = this.getSelectedPlayersData();
-        
-        if (selectedData.length === 0) {
-            return [
-                { label: 'Selected Players', value: '0' },
-                { label: 'Avg 3PT Rate', value: 'N/A' },
-                { label: 'Peak Season', value: 'N/A' },
-                { label: 'Total 3s Made', value: 'N/A' }
-            ];
-        }
-        
-        const allSeasons = selectedData.flatMap(p => p.seasons);
-        const avgRate = d3.mean(allSeasons, d => d.three_pt_rate);
-        const totalMade = d3.sum(allSeasons, d => d.made_threes || 0);
-        const peakSeason = d3.max(allSeasons, d => d.three_pt_rate);
-        
-        return [
-            { label: 'Selected Players', value: selectedData.length },
-            { label: 'Avg 3PT Rate', value: `${avgRate.toFixed(1)}%` },
-            { label: 'Peak 3PT Rate', value: `${peakSeason.toFixed(1)}%` },
-            { label: 'Total 3s Made', value: totalMade.toLocaleString() }
-        ];
-    }
-    
-    getSelectedPlayersData() {
-        return this.selectedPlayers.map(playerName => {
-            const player = this.data.players.find(p => p.player === playerName);
-            if (!player) return null;
-            
-            const seasons = player.seasons.filter(s => 
-                s.season >= this.timeRange.start && s.season <= this.timeRange.end
-            );
-            
-            return { player: playerName, seasons };
-        }).filter(d => d && d.seasons.length > 0);
-    }
-    
-    updateInsights() {
-        const insightsContainer = d3.select('#chart-insights');
-        insightsContainer.selectAll('*').remove();
-        
-        const insights = this.generateInsights();
-        
-        insights.forEach(insight => {
-            const insightCard = insightsContainer.append('div')
-                .attr('class', 'insight-card');
-            
-            insightCard.append('div')
-                .attr('class', 'insight-icon')
-                .text(insight.icon);
-            
-            insightCard.append('div')
-                .attr('class', 'insight-text')
-                .text(insight.text);
-        });
-    }
-    
-    generateInsights() {
-        const selectedData = this.getSelectedPlayersData();
-        const insights = [];
-        
-        if (selectedData.length === 0) {
-            return [{ icon: '💡', text: 'Select players to see insights about their performance and trends.' }];
-        }
-        
-        // Generate dynamic insights based on data
-        const allSeasons = selectedData.flatMap(p => p.seasons);
-        const avgGrowth = d3.mean(allSeasons.slice(1), (d, i) => {
-            const prev = allSeasons[i];
-            return prev ? d.three_pt_rate - prev.three_pt_rate : 0;
-        });
-        
-        if (avgGrowth > 2) {
-            insights.push({
-                icon: '📈',
-                text: `Selected players show strong upward trend in 3-point shooting (+${avgGrowth.toFixed(1)}% avg growth).`
-            });
-        }
-        
-        const consistentPlayers = selectedData.filter(p => {
-            const rates = p.seasons.map(s => s.three_pt_rate);
-            const stdDev = d3.deviation(rates);
-            return stdDev < 5;
-        });
-        
-        if (consistentPlayers.length > 0) {
-            insights.push({
-                icon: '⚖️',
-                text: `${consistentPlayers.length} player(s) show exceptional consistency in their shooting profile.`
-            });
-        }
-        
-        return insights.length > 0 ? insights : [
-            { icon: '🔍', text: 'Analyzing selected players for patterns and insights...' }
-        ];
-    }
-    
-    exportChart(format) {
-        console.log(`Exporting chart as ${format}...`);
-        // Implementation for chart export
-    }
-    
-    showError(message) {
-        console.error('Enhanced Explorer Error:', message);
-        
-        const errorContainer = d3.select('#explorer-dashboard');
-        errorContainer.selectAll('*').remove();
-        
-        errorContainer.append('div')
-            .attr('class', 'error-message')
-            .style('text-align', 'center')
-            .style('padding', '40px')
-            .style('color', '#dc2626')
-            .html(`
-                <h2>⚠️ Error Loading Enhanced Explorer</h2>
-                <p>${message}</p>
-                <button onclick="location.reload()">🔄 Refresh Page</button>
-            `);
-    }
-    
-    populateTeamFilters() {
-        console.log('🏟️ Populating team filters...');
-        
-        if (!this.teamStructure) return;
-        
-        // Eastern Conference teams
-        const easternDiv = d3.select('#eastern-divisions');
-        if (!easternDiv.empty()) {
-            this.populateConferenceTeams(easternDiv, this.teamStructure['Eastern Conference']);
-        }
-        
-        // Western Conference teams  
-        const westernDiv = d3.select('#western-divisions');
-        if (!westernDiv.empty()) {
-            this.populateConferenceTeams(westernDiv, this.teamStructure['Western Conference']);
-        }
-    }
-    
-    populateConferenceTeams(container, divisions) {
-        Object.entries(divisions).forEach(([divisionName, teams]) => {
-            const divSection = container.select(`[data-division="${divisionName}"] .team-list`);
-            if (!divSection.empty()) {
-                divSection.selectAll('.team-option').remove();
-                
-                teams.forEach(teamName => {
-                    divSection.append('div')
-                        .attr('class', 'team-option')
-                        .attr('data-team', teamName)
-                        .text(teamName)
-                        .on('click', (event) => {
-                            this.toggleTeamSelection(teamName, event.target);
-                        });
-                });
-            }
-        });
-    }
-    
-    populatePlayerSearch() {
-        console.log('👤 Populating player search...');
-        
-        if (!this.topShooters) return;
-        
-        // Clear existing selected players except the default one
-        const selectedContainer = d3.select('#selected-players');
-        selectedContainer.selectAll('.selected-item').remove();
-        
-        // Add default player (Stephen Curry if he's in the top shooters)
-        const curry = this.topShooters.find(p => p.PLAYER_NAME.includes('Stephen Curry'));
-        if (curry) {
-            this.addSelectedPlayer(curry.PLAYER_NAME);
-        }
-        
-        // Setup player search dropdown
-        const searchInput = d3.select('#player-search');
-        const dropdown = d3.select('#player-dropdown');
-        
-        searchInput.on('input', (event) => {
-            const query = event.target.value.toLowerCase();
-            this.updatePlayerDropdown(query);
-        });
-        
-        searchInput.on('focus', () => {
-            this.updatePlayerDropdown('');
-        });
-        
-        // Hide dropdown when clicking outside
-        d3.select('body').on('click', (event) => {
-            if (!event.target.closest('.search-container')) {
-                dropdown.classed('show', false);
-            }
-        });
-    }
-    
-    updatePlayerDropdown(query) {
-        const dropdown = d3.select('#player-dropdown');
-        dropdown.selectAll('.dropdown-item').remove();
-        
-        const filteredPlayers = this.topShooters.filter(player => 
-            player.PLAYER_NAME.toLowerCase().includes(query)
-        ).slice(0, 10); // Show top 10 matches
-        
-        if (filteredPlayers.length > 0) {
-            dropdown.classed('show', true);
-            
-            filteredPlayers.forEach(player => {
-                dropdown.append('div')
-                    .attr('class', 'dropdown-item')
-                    .text(`${player.PLAYER_NAME} (${player.three_pt_made} made, ${player.actual_3pt_percentage}%)`)
-                    .on('click', () => {
-                        this.addSelectedPlayer(player.PLAYER_NAME);
-                        d3.select('#player-search').property('value', '');
-                        dropdown.classed('show', false);
-                    });
-            });
-        } else {
-            dropdown.classed('show', false);
-        }
-    }
-    
-    addSelectedPlayer(playerName) {
-        if (this.selectedPlayers.includes(playerName)) return;
-        
-        this.selectedPlayers.push(playerName);
-        
-        const selectedContainer = d3.select('#selected-players');
-        selectedContainer.append('div')
-            .attr('class', 'selected-item')
-            .attr('data-player', playerName)
-            .html(`
-                <span>${playerName}</span>
-                <button class="remove-btn">×</button>
-            `)
-            .select('.remove-btn')
-            .on('click', () => {
-                this.removeSelectedPlayer(playerName);
-            });
-            
-        this.updateVisualization();
-    }
-    
-    removeSelectedPlayer(playerName) {
-        this.selectedPlayers = this.selectedPlayers.filter(p => p !== playerName);
-        d3.select(`[data-player="${playerName}"]`).remove();
-        this.updateVisualization();
-    }
-    
-    toggleTeamSelection(teamName, element) {
-        const isSelected = element.classList.contains('selected');
-        
-        if (isSelected) {
-            element.classList.remove('selected');
-            this.selectedTeams = this.selectedTeams.filter(t => t !== teamName);
-        } else {
-            element.classList.add('selected');
-            this.selectedTeams.push(teamName);
-        }
-        
-        this.updateVisualization();
-    }
-    
-    updateVisualization() {
-        console.log('📊 Updating visualization with:', {
-            selectedPlayers: this.selectedPlayers,
-            selectedTeams: this.selectedTeams
-        });
-        
-        // Determine current analysis type
-        const analysisType = d3.select('.analysis-btn.active').node()?.dataset.type || 'players';
-        
-        if (analysisType === 'players') {
-            this.renderPlayerEvolution();
-        } else {
-            this.renderTeamEvolution();
-        }
-    }
-    
-    renderPlayerEvolution() {
-        if (this.selectedPlayers.length === 0) return;
-        
-        console.log('👤 Rendering player evolution for:', this.selectedPlayers);
-        
-        const svg = d3.select('#explorer-main');
-        svg.selectAll('*').remove();
-        
-        const margin = { top: 20, right: 120, bottom: 40, left: 60 };
-        const width = 900 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
-        
-        const g = svg.append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
-        
-        // Get data for selected players
-        const playerData = this.selectedPlayers.map(playerName => {
-            const playerTrends = this.playerTrends.filter(d => d.PLAYER_NAME === playerName);
-            return {
-                name: playerName,
-                data: playerTrends
-            };
-        });
-        
-        if (playerData.every(p => p.data.length === 0)) {
-            g.append('text')
-                .attr('x', width / 2)
-                .attr('y', height / 2)
-                .attr('text-anchor', 'middle')
-                .style('font-size', '18px')
-                .style('fill', '#666')
-                .text('No data available for selected players');
-            return;
-        }
-        
-        // Scales
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(this.playerTrends, d => d.FILE_YEAR))
-            .range([0, width]);
-            
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(this.playerTrends, d => d.three_pt_percentage)])
-            .range([height, 0]);
-        
-        // Line generator
-        const line = d3.line()
-            .x(d => xScale(d.FILE_YEAR))
-            .y(d => yScale(d.three_pt_percentage))
-            .curve(d3.curveMonotoneX);
-        
-        // Color scale
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-        
-        // Draw axes
-        g.append('g')
-            .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-            
-        g.append('g')
-            .call(d3.axisLeft(yScale));
-        
-        // Draw lines for each player
-        playerData.forEach((player, i) => {
-            if (player.data.length === 0) return;
-            
-            g.append('path')
-                .datum(player.data)
-                .attr('fill', 'none')
-                .attr('stroke', colorScale(i))
-                .attr('stroke-width', 3)
-                .attr('d', line);
-                
-            // Add legend
-            g.append('text')
-                .attr('x', width + 10)
-                .attr('y', 20 + i * 20)
-                .style('fill', colorScale(i))
-                .style('font-size', '12px')
-                .text(player.name);
-        });
-        
-        // Labels
-        g.append('text')
-            .attr('transform', 'rotate(-90)')
-            .attr('y', 0 - margin.left)
-            .attr('x', 0 - (height / 2))
-            .attr('dy', '1em')
-            .style('text-anchor', 'middle')
-            .text('Three-Point Percentage');
-            
-        g.append('text')
-            .attr('transform', `translate(${width / 2}, ${height + margin.bottom})`)
-            .style('text-anchor', 'middle')
-            .text('Season');
-    }
-    
-    renderTeamEvolution() {
-        if (this.selectedTeams.length === 0) return;
-        
-        console.log('🏟️ Rendering team evolution for:', this.selectedTeams);
-        
-        const svg = d3.select('#explorer-main');
-        svg.selectAll('*').remove();
-        
-        const margin = { top: 20, right: 120, bottom: 40, left: 60 };
-        const width = 900 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
-        
-        const g = svg.append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
-        
-        // Get data for selected teams
-        const teamData = this.selectedTeams.map(teamName => {
-            const teamTrends = this.teamTrends.filter(d => d.TEAM_NAME === teamName);
-            return {
-                name: teamName,
-                data: teamTrends
-            };
-        });
-        
-        if (teamData.every(t => t.data.length === 0)) {
-            g.append('text')
-                .attr('x', width / 2)
-                .attr('y', height / 2)
-                .attr('text-anchor', 'middle')
-                .style('font-size', '18px')
-                .style('fill', '#666')
-                .text('No data available for selected teams');
-            return;
-        }
-        
-        // Scales
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(this.teamTrends, d => d.FILE_YEAR))
-            .range([0, width]);
-            
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(this.teamTrends, d => d.three_pt_rate)])
-            .range([height, 0]);
-        
-        // Line generator
-        const line = d3.line()
-            .x(d => xScale(d.FILE_YEAR))
-            .y(d => yScale(d.three_pt_rate))
-            .curve(d3.curveMonotoneX);
-        
-        // Color scale
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-        
-        // Draw axes
-        g.append('g')
-            .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format('d')));
-            
-        g.append('g')
-            .call(d3.axisLeft(yScale));
-        
-        // Draw lines for each team
-        teamData.forEach((team, i) => {
-            if (team.data.length === 0) return;
-            
-            g.append('path')
-                .datum(team.data)
-                .attr('fill', 'none')
-                .attr('stroke', colorScale(i))
-                .attr('stroke-width', 3)
-                .attr('d', line);
-                
-            // Add legend
-            g.append('text')
-                .attr('x', width + 10)
-                .attr('y', 20 + i * 20)
-                .style('fill', colorScale(i))
-                .style('font-size', '12px')
-                .text(team.name);
-        });
-        
-        // Labels
-        g.append('text')
-            .attr('transform', 'rotate(-90)')
-            .attr('y', 0 - margin.left)
-            .attr('x', 0 - (height / 2))
-            .attr('dy', '1em')
-            .style('text-anchor', 'middle')
-            .text('Three-Point Rate (%)');
-            
-        g.append('text')
-            .attr('transform', `translate(${width / 2}, ${height + margin.bottom})`)
-            .style('text-anchor', 'middle')
-            .text('Season');
-    }
-}
+    },
 
-// Global instance
-window.nbaAdvancedExplorer = new NBAAdvancedExplorer();
+    hideAdvancedTooltip() {
+        d3.select('.advanced-tooltip')
+            .transition()
+            .duration(200)
+            .style('opacity', 0)
+            .remove();
+    }
+});
+
+// Export for use
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { NBAAdvancedExplorer };
+}
