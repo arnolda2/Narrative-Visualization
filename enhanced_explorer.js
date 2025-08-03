@@ -57,8 +57,15 @@ class NBAAdvancedExplorer {
         this.populateTeamFilters();
         this.populateTopShooters();
         this.populatePlayerList();
+        
+        // Set initial view based on main UI state
+        if (window.state && window.state.analysisType) {
+            this.currentView = window.state.analysisType === 'players' ? 'players' : 'teams';
+        }
+        
         // Bind team selection listeners after UI is populated
         this.bindTeamSelectionListeners();
+        this.updateViewSections();
     }
 
     createFullUIHTML() {
@@ -676,6 +683,22 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         this.updateInsights();
         this.updateQuickStats();
+    },
+
+    setCurrentView(viewType) {
+        // Map external view types to internal view types
+        const viewMapping = {
+            'players': 'players',
+            'teams': 'teams'
+        };
+        
+        const newView = viewMapping[viewType] || 'teams';
+        if (this.currentView !== newView) {
+            this.currentView = newView;
+            console.log(`🔄 Enhanced explorer view switched to: ${newView}`);
+            this.updateViewSections();
+            this.updateVisualization();
+        }
     },
 
     drawTeamTrends(g, width, height) {

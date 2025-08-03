@@ -375,7 +375,14 @@ function initializeEventListeners() {
             e.target.classList.add('active');
             state.analysisType = e.target.dataset.type;
             toggleAnalysisControls();
-            if (state.currentScene === 4) updateExplorerVisualization();
+            
+            // Update enhanced explorer if it's loaded
+            if (window.nbaAdvancedExplorer && state.currentScene === 4) {
+                const viewType = e.target.dataset.type; // 'players' or 'teams'
+                window.nbaAdvancedExplorer.setCurrentView(viewType);
+            } else if (state.currentScene === 4) {
+                updateExplorerVisualization();
+            }
         });
     });
 
