@@ -1629,15 +1629,21 @@ function selectItem(item, type) {
             state.selectedPlayers.push(item);
             updateSelectedItems('players');
         }
-        document.getElementById('player-search').value = '';
-        document.getElementById('player-dropdown').classList.remove('show');
+        // Safe element access
+        const playerSearch = document.getElementById('player-search');
+        const playerDropdown = document.getElementById('player-dropdown');
+        if (playerSearch) playerSearch.value = '';
+        if (playerDropdown) playerDropdown.classList.remove('show');
     } else {
         if (!state.selectedTeams.includes(item)) {
             state.selectedTeams.push(item);
             updateSelectedItems('teams');
         }
-        document.getElementById('team-search').value = '';
-        document.getElementById('team-dropdown').classList.remove('show');
+        // Safe element access
+        const teamSearch = document.getElementById('team-search');
+        const teamDropdown = document.getElementById('team-dropdown');
+        if (teamSearch) teamSearch.value = '';
+        if (teamDropdown) teamDropdown.classList.remove('show');
     }
     
     if (state.currentScene === 4) updateExplorerVisualization();
@@ -1647,6 +1653,13 @@ function updateSelectedItems(type) {
     const container = type === 'players' ? 
         document.getElementById('selected-players') : 
         document.getElementById('selected-teams');
+    
+    // Check if container exists
+    if (!container) {
+        console.warn(`Container for ${type} not found`);
+        return;
+    }
+    
     const items = type === 'players' ? state.selectedPlayers : state.selectedTeams;
     
     container.innerHTML = '';
