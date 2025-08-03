@@ -56,6 +56,9 @@ class NBAAdvancedExplorer {
         this.bindEventListeners();
         this.populateTeamFilters();
         this.populateTopShooters();
+        this.populatePlayerList();
+        // Bind team selection listeners after UI is populated
+        this.bindTeamSelectionListeners();
     }
 
     createFullUIHTML() {
@@ -110,12 +113,9 @@ class NBAAdvancedExplorer {
             </div>
 
             <div id="player-filter-section" style="display: none; margin-bottom: 24px;">
-                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Player Search</h3>
-                <div style="position: relative; margin-bottom: 16px;">
-                    <input type="text" id="player-search-input" placeholder="Search players..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #f8fafc;">
-                    <div id="player-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
-                </div>
-                <div>
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Top 20 Players Selection</h3>
+                <div id="player-list-container" style="max-height: 300px; overflow-y: auto;"></div>
+                <div style="margin-top: 16px;">
                     <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">Selected Players</h4>
                     <div id="selected-players-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
                 </div>
@@ -242,6 +242,25 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                     </div>
                 </div>
                 <div style="font-size: 10px;">
+                    ${shooter.career_three_pt_made}/${shooter.career_three_pt_attempts}
+                </div>
+            </div>
+        `).join('');
+    },
+
+    populatePlayerList() {
+        const container = document.getElementById('player-list-container');
+        container.innerHTML = this.topShooters.map((shooter, index) => `
+            <div class="player-list-option ${this.selectedPlayers.has(shooter.player) ? 'selected' : ''}" 
+                 data-player="${shooter.player}"
+                 style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: ${this.selectedPlayers.has(shooter.player) ? '#ea580c' : 'white'}; color: ${this.selectedPlayers.has(shooter.player) ? 'white' : 'black'}; border: 2px solid ${this.selectedPlayers.has(shooter.player) ? '#ea580c' : '#e2e8f0'}; border-radius: 6px; font-size: 12px; font-weight: 500; margin-bottom: 4px; cursor: pointer; transition: all 0.2s ease;">
+                <div>
+                    <strong>#${index + 1} ${shooter.player}</strong>
+                    <div style="font-size: 10px; opacity: 0.8;">
+                        ${shooter.career_three_pt_percentage}% career • ${shooter.years_active}
+                    </div>
+                </div>
+                <div style="font-size: 10px; font-weight: 600;">
                     ${shooter.career_three_pt_made}/${shooter.career_three_pt_attempts}
                 </div>
             </div>
@@ -391,25 +410,83 @@ Object.assign(NBAAdvancedExplorer.prototype, {
     },
 
     bindShooterSelectionListeners() {
+        // Bind shooters section player cards
         document.querySelectorAll('.player-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 const player = e.currentTarget.dataset.player;
-                
-                if (this.selectedPlayers.has(player)) {
-                    this.selectedPlayers.delete(player);
-                    e.currentTarget.classList.remove('selected');
-                    e.currentTarget.style.background = '#f8fafc';
-                    e.currentTarget.style.color = 'black';
-                } else {
-                    this.selectedPlayers.add(player);
-                    e.currentTarget.classList.add('selected');
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ea580c, #dc2626)';
-                    e.currentTarget.style.color = 'white';
-                }
-                
-                this.updateSelectedPlayersDisplay();
-                this.updateVisualization();
+                this.togglePlayerSelection(player, e.currentTarget, true);
             });
+        });
+        
+        // Bind player list options  
+        document.querySelectorAll('.player-list-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const player = e.currentTarget.dataset.player;
+                this.togglePlayerSelection(player, e.currentTarget, false);
+            });
+        });
+    },
+
+    togglePlayerSelection(player, element, isShooterCard) {
+        if (this.selectedPlayers.has(player)) {
+            this.selectedPlayers.delete(player);
+            element.classList.remove('selected');
+            if (isShooterCard) {
+                element.style.background = '#f8fafc';
+                element.style.color = 'black';
+            } else {
+                element.style.background = 'white';
+                element.style.color = 'black';
+                element.style.border = '2px solid #e2e8f0';
+            }
+        } else {
+            this.selectedPlayers.add(player);
+            element.classList.add('selected');
+            if (isShooterCard) {
+                element.style.background = 'linear-gradient(135deg, #ea580c, #dc2626)';
+                element.style.color = 'white';
+            } else {
+                element.style.background = '#ea580c';
+                element.style.color = 'white';
+                element.style.border = '2px solid #ea580c';
+            }
+        }
+        
+        // Update both displays to keep them in sync
+        this.syncPlayerSelections();
+        this.updateSelectedPlayersDisplay();
+        this.updateVisualization();
+    },
+
+    syncPlayerSelections() {
+        // Sync shooters section
+        document.querySelectorAll('.player-card').forEach(card => {
+            const player = card.dataset.player;
+            if (this.selectedPlayers.has(player)) {
+                card.classList.add('selected');
+                card.style.background = 'linear-gradient(135deg, #ea580c, #dc2626)';
+                card.style.color = 'white';
+            } else {
+                card.classList.remove('selected');
+                card.style.background = '#f8fafc';
+                card.style.color = 'black';
+            }
+        });
+        
+        // Sync player list
+        document.querySelectorAll('.player-list-option').forEach(option => {
+            const player = option.dataset.player;
+            if (this.selectedPlayers.has(player)) {
+                option.classList.add('selected');
+                option.style.background = '#ea580c';
+                option.style.color = 'white';
+                option.style.border = '2px solid #ea580c';
+            } else {
+                option.classList.remove('selected');
+                option.style.background = 'white';
+                option.style.color = 'black';
+                option.style.border = '2px solid #e2e8f0';
+            }
         });
     },
 
@@ -580,9 +657,15 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             return;
         }
 
+        // Debug: Check selected teams and available team data
+        console.log('Selected teams:', Array.from(this.selectedTeams));
+        console.log('Available teams in master data:', this.data.team_data.map(t => t.team));
+        
         const selectedTeamData = this.data.team_data.filter(team => 
             this.selectedTeams.has(team.team)
         );
+        
+        console.log('Found team data for:', selectedTeamData.map(t => t.team));
 
         const allSeasons = [];
         selectedTeamData.forEach(team => {
