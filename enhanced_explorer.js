@@ -33,7 +33,7 @@ class NBAAdvancedExplorer {
         try {
             const [masterData, topShooters] = await Promise.all([
                 d3.json('data/master_three_point_data.json'),
-                d3.json('data/top_20_three_point_shooters.json')
+                d3.json('data/top_30_three_point_shooters.json')
             ]);
             
             this.data = masterData;
@@ -113,7 +113,7 @@ class NBAAdvancedExplorer {
             </div>
 
             <div id="player-filter-section" style="display: none; margin-bottom: 24px;">
-                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Top 20 Players Selection</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Top 30 Players Selection</h3>
                 <div id="player-list-container" style="max-height: 300px; overflow-y: auto;"></div>
                 <div style="margin-top: 16px;">
                     <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">Selected Players</h4>
@@ -122,7 +122,7 @@ class NBAAdvancedExplorer {
             </div>
 
             <div id="shooters-section" style="display: none; margin-bottom: 24px;">
-                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🎯 Top 20 Elite Shooters</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🎯 Top 30 Elite Shooters</h3>
                 <div id="top-shooters-list"></div>
             </div>
 
@@ -154,10 +154,8 @@ class NBAAdvancedExplorer {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9;">
                 <h2 id="advanced-chart-title" style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0;">Team Three-Point Trends</h2>
                 <div style="display: flex; gap: 12px;">
-                    <div style="display: flex; gap: 6px;">
-                        <button class="chart-option-btn active" data-view="trends" style="padding: 6px 12px; background: #ea580c; color: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">📈 Trends</button>
-                        <button class="chart-option-btn" data-view="comparison" style="padding: 6px 12px; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">⚖️ Compare</button>
-                        <button class="chart-option-btn" data-view="performance" style="padding: 6px 12px; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">📊 Performance</button>
+                    <div id="chart-option-buttons" style="display: flex; gap: 6px;">
+                        <!-- Buttons will be dynamically populated based on view -->
                     </div>
                 </div>
             </div>
@@ -367,21 +365,6 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 });
             }
         });
-
-        // Chart view buttons
-        document.querySelectorAll('.chart-option-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.chart-option-btn').forEach(b => {
-                    b.classList.remove('active');
-                    b.style.background = '#f1f5f9';
-                    b.style.color = '#64748b';
-                });
-                e.target.classList.add('active');
-                e.target.style.background = '#ea580c';
-                e.target.style.color = 'white';
-                this.updateVisualization();
-            });
-        });
     },
 
     bindTeamSelectionListeners() {
@@ -512,6 +495,56 @@ Object.assign(NBAAdvancedExplorer.prototype, {
         };
         
         document.getElementById('advanced-chart-title').textContent = titles[this.currentView];
+        
+        // Update chart option buttons based on view
+        this.updateChartOptionButtons();
+    },
+
+    updateChartOptionButtons() {
+        const container = document.getElementById('chart-option-buttons');
+        if (!container) return;
+
+        // Define buttons for each view type
+        const buttonConfigs = {
+            'teams': [
+                { view: 'trends', label: '📈 Trends', active: true }
+            ],
+            'players': [
+                { view: 'trends', label: '📈 Trends', active: true }
+            ],
+            'shooters': [
+                { view: 'trends', label: '📈 Rankings', active: true }
+            ]
+        };
+
+        const buttons = buttonConfigs[this.currentView] || [];
+        
+        container.innerHTML = buttons.map(btn => `
+            <button class="chart-option-btn ${btn.active ? 'active' : ''}" 
+                    data-view="${btn.view}" 
+                    style="padding: 6px 12px; background: ${btn.active ? '#ea580c' : '#f1f5f9'}; color: ${btn.active ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                ${btn.label}
+            </button>
+        `).join('');
+
+        // Rebind button event listeners
+        this.bindChartOptionButtons();
+    },
+
+    bindChartOptionButtons() {
+        document.querySelectorAll('.chart-option-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.chart-option-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = '#f1f5f9';
+                    b.style.color = '#64748b';
+                });
+                e.target.classList.add('active');
+                e.target.style.background = '#ea580c';
+                e.target.style.color = 'white';
+                this.updateVisualization();
+            });
+        });
     },
 
     updateSelectedCount() {
@@ -833,9 +866,15 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             return;
         }
 
+        // Debug: Check selected players and available player data
+        console.log('Selected players:', Array.from(this.selectedPlayers));
+        console.log('Available players in master data:', this.data.player_data ? this.data.player_data.map(p => p.player) : 'No player_data');
+        
         const selectedPlayerData = Array.from(this.selectedPlayers).map(playerName => {
-            return this.data.player_data.find(p => p.player === playerName);
+            return this.data.player_data ? this.data.player_data.find(p => p.player === playerName) : null;
         }).filter(Boolean);
+        
+        console.log('Found player data for:', selectedPlayerData.map(p => p.player));
 
         if (selectedPlayerData.length === 0) {
             g.append('text')

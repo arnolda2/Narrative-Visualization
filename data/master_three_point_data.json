@@ -77097,9 +77097,9 @@
       "seasons_played": 7,
       "years_active": "2018-2024",
       "teams": [
-        "Detroit Pistons",
+        "Memphis Grizzlies",
         "Los Angeles Clippers",
-        "Memphis Grizzlies"
+        "Detroit Pistons"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -77176,12 +77176,12 @@
       "seasons_played": 8,
       "years_active": "2004-2012",
       "teams": [
-        "Charlotte Bobcats",
-        "Toronto Raptors",
-        "Miami Heat",
         "Philadelphia 76ers",
+        "Charlotte Bobcats",
+        "Los Angeles Lakers",
+        "Miami Heat",
         "Cleveland Cavaliers",
-        "Los Angeles Lakers"
+        "Toronto Raptors"
       ],
       "position_group": "F",
       "seasons_data": [
@@ -77267,8 +77267,8 @@
       "seasons_played": 9,
       "years_active": "2015-2024",
       "teams": [
-        "Brooklyn Nets",
         "Detroit Pistons",
+        "Brooklyn Nets",
         "Cleveland Cavaliers"
       ],
       "position_group": "G",
@@ -77364,8 +77364,8 @@
       "seasons_played": 11,
       "years_active": "2004-2014",
       "teams": [
-        "Los Angeles Lakers",
         "Phoenix Suns",
+        "Los Angeles Lakers",
         "Dallas Mavericks"
       ],
       "position_group": "G",
@@ -77479,13 +77479,13 @@
       "seasons_played": 10,
       "years_active": "2007-2016",
       "teams": [
-        "San Antonio Spurs",
-        "Toronto Raptors",
+        "Milwaukee Bucks",
         "New York Knicks",
         "Los Angeles Clippers",
-        "Milwaukee Bucks",
+        "Houston Rockets",
+        "San Antonio Spurs",
         "Oklahoma City Thunder",
-        "Houston Rockets"
+        "Toronto Raptors"
       ],
       "position_group": "F",
       "seasons_data": [
@@ -77589,11 +77589,11 @@
       "seasons_played": 8,
       "years_active": "2016-2024",
       "teams": [
+        "Philadelphia 76ers",
+        "Sacramento Kings",
         "Portland Trail Blazers",
         "Brooklyn Nets",
-        "Philadelphia 76ers",
-        "Dallas Mavericks",
-        "Sacramento Kings"
+        "Dallas Mavericks"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -77679,12 +77679,12 @@
       "seasons_played": 17,
       "years_active": "2004-2020",
       "teams": [
+        "Philadelphia 76ers",
+        "Milwaukee Bucks",
+        "Atlanta Hawks",
         "Utah Jazz",
         "Chicago Bulls",
-        "Atlanta Hawks",
-        "Philadelphia 76ers",
-        "Cleveland Cavaliers",
-        "Milwaukee Bucks"
+        "Cleveland Cavaliers"
       ],
       "position_group": "F",
       "seasons_data": [
@@ -78044,9 +78044,9 @@
         "New Orleans Pelicans",
         "Golden State Warriors",
         "Chicago Bulls",
+        "Oklahoma City Thunder",
         "New Jersey Nets",
-        "Dallas Mavericks",
-        "Oklahoma City Thunder"
+        "Dallas Mavericks"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -78141,8 +78141,8 @@
       "seasons_played": 12,
       "years_active": "2005-2016",
       "teams": [
-        "Toronto Raptors",
-        "San Antonio Spurs"
+        "San Antonio Spurs",
+        "Toronto Raptors"
       ],
       "position_group": "C",
       "seasons_data": [
@@ -78314,13 +78314,13 @@
       "seasons_played": 15,
       "years_active": "2007-2021",
       "teams": [
-        "New Orleans Pelicans",
-        "Orlando Magic",
         "Philadelphia 76ers",
-        "Los Angeles Clippers",
-        "Dallas Mavericks",
         "Milwaukee Bucks",
-        "LA Clippers"
+        "Orlando Magic",
+        "Los Angeles Clippers",
+        "LA Clippers",
+        "New Orleans Pelicans",
+        "Dallas Mavericks"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -78469,12 +78469,12 @@
       "seasons_played": 14,
       "years_active": "2004-2017",
       "teams": [
-        "Denver Nuggets",
         "Minnesota Timberwolves",
+        "Washington Wizards",
         "Memphis Grizzlies",
         "Miami Heat",
-        "Washington Wizards",
-        "Cleveland Cavaliers"
+        "Cleveland Cavaliers",
+        "Denver Nuggets"
       ],
       "position_group": "F",
       "seasons_data": [
@@ -78727,10 +78727,10 @@
       "seasons_played": 6,
       "years_active": "2019-2024",
       "teams": [
-        "Milwaukee Bucks",
+        "Memphis Grizzlies",
         "Phoenix Suns",
-        "Utah Jazz",
-        "Memphis Grizzlies"
+        "Milwaukee Bucks",
+        "Utah Jazz"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -78798,9 +78798,9 @@
       "seasons_played": 6,
       "years_active": "2004-2009",
       "teams": [
+        "San Antonio Spurs",
         "Seattle SuperSonics",
-        "Houston Rockets",
-        "San Antonio Spurs"
+        "Houston Rockets"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -78870,9 +78870,9 @@
       "teams": [
         "San Antonio Spurs",
         "Chicago Bulls",
-        "Dallas Mavericks",
+        "Oklahoma City Thunder",
         "Indiana Pacers",
-        "Oklahoma City Thunder"
+        "Dallas Mavericks"
       ],
       "position_group": "F",
       "seasons_data": [
@@ -78977,9 +78977,9 @@
       "years_active": "2017-2023",
       "teams": [
         "Minnesota Timberwolves",
-        "Denver Nuggets",
         "San Antonio Spurs",
-        "Milwaukee Bucks"
+        "Milwaukee Bucks",
+        "Denver Nuggets"
       ],
       "position_group": "G",
       "seasons_data": [
@@ -79104,6 +79104,823 @@
           "three_pt_percentage": 39.7,
           "year": 2024,
           "player": "Michael Porter Jr."
+        }
+      ]
+    },
+    {
+      "player": "Patrick Williams",
+      "career_three_pt_percentage": 41.0,
+      "career_three_pt_made": 243,
+      "career_three_pt_attempts": 592,
+      "seasons_played": 4,
+      "years_active": "2021-2024",
+      "teams": [
+        "Chicago Bulls"
+      ],
+      "position_group": "F",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 138,
+          "three_pt_made": 54,
+          "team": "Chicago Bulls",
+          "position_group": "F",
+          "three_pt_percentage": 39.1,
+          "year": 2021,
+          "player": "Patrick Williams"
+        },
+        {
+          "three_pt_attempts": 29,
+          "three_pt_made": 15,
+          "team": "Chicago Bulls",
+          "position_group": "F",
+          "three_pt_percentage": 51.7,
+          "year": 2022,
+          "player": "Patrick Williams"
+        },
+        {
+          "three_pt_attempts": 277,
+          "three_pt_made": 115,
+          "team": "Chicago Bulls",
+          "position_group": "F",
+          "three_pt_percentage": 41.5,
+          "year": 2023,
+          "player": "Patrick Williams"
+        },
+        {
+          "three_pt_attempts": 148,
+          "three_pt_made": 59,
+          "team": "Chicago Bulls",
+          "position_group": "F",
+          "three_pt_percentage": 39.9,
+          "year": 2024,
+          "player": "Patrick Williams"
+        }
+      ]
+    },
+    {
+      "player": "Peja Stojakovic",
+      "career_three_pt_percentage": 40.9,
+      "career_three_pt_made": 1176,
+      "career_three_pt_attempts": 2872,
+      "seasons_played": 8,
+      "years_active": "2004-2011",
+      "teams": [
+        "Sacramento Kings",
+        "New Orleans/Oklahoma City Hornets",
+        "Indiana Pacers",
+        "New Orleans Hornets",
+        "Dallas Mavericks"
+      ],
+      "position_group": "F",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 554,
+          "three_pt_made": 240,
+          "team": "Sacramento Kings",
+          "position_group": "F",
+          "three_pt_percentage": 43.3,
+          "year": 2004,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 433,
+          "three_pt_made": 174,
+          "team": "Sacramento Kings",
+          "position_group": "F",
+          "three_pt_percentage": 40.2,
+          "year": 2005,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 406,
+          "three_pt_made": 163,
+          "team": "Indiana Pacers",
+          "position_group": "F",
+          "three_pt_percentage": 40.1,
+          "year": 2006,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 84,
+          "three_pt_made": 34,
+          "team": "New Orleans/Oklahoma City Hornets",
+          "position_group": "F",
+          "three_pt_percentage": 40.5,
+          "year": 2007,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 524,
+          "three_pt_made": 231,
+          "team": "New Orleans Hornets",
+          "position_group": "F",
+          "three_pt_percentage": 44.1,
+          "year": 2008,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 383,
+          "three_pt_made": 145,
+          "team": "New Orleans Hornets",
+          "position_group": "F",
+          "three_pt_percentage": 37.9,
+          "year": 2009,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 352,
+          "three_pt_made": 132,
+          "team": "New Orleans Hornets",
+          "position_group": "F",
+          "three_pt_percentage": 37.5,
+          "year": 2010,
+          "player": "Peja Stojakovic"
+        },
+        {
+          "three_pt_attempts": 136,
+          "three_pt_made": 57,
+          "team": "Dallas Mavericks",
+          "position_group": "F",
+          "three_pt_percentage": 41.9,
+          "year": 2011,
+          "player": "Peja Stojakovic"
+        }
+      ]
+    },
+    {
+      "player": "Anthony Parker",
+      "career_three_pt_percentage": 40.9,
+      "career_three_pt_made": 586,
+      "career_three_pt_attempts": 1433,
+      "seasons_played": 6,
+      "years_active": "2007-2012",
+      "teams": [
+        "Cleveland Cavaliers",
+        "Toronto Raptors"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 261,
+          "three_pt_made": 115,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 44.1,
+          "year": 2007,
+          "player": "Anthony Parker"
+        },
+        {
+          "three_pt_attempts": 304,
+          "three_pt_made": 133,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 43.8,
+          "year": 2008,
+          "player": "Anthony Parker"
+        },
+        {
+          "three_pt_attempts": 241,
+          "three_pt_made": 94,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 39.0,
+          "year": 2009,
+          "player": "Anthony Parker"
+        },
+        {
+          "three_pt_attempts": 262,
+          "three_pt_made": 108,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 41.2,
+          "year": 2010,
+          "player": "Anthony Parker"
+        },
+        {
+          "three_pt_attempts": 227,
+          "three_pt_made": 86,
+          "team": "Cleveland Cavaliers",
+          "position_group": "F",
+          "three_pt_percentage": 37.9,
+          "year": 2011,
+          "player": "Anthony Parker"
+        },
+        {
+          "three_pt_attempts": 138,
+          "three_pt_made": 50,
+          "team": "Cleveland Cavaliers",
+          "position_group": "F",
+          "three_pt_percentage": 36.2,
+          "year": 2012,
+          "player": "Anthony Parker"
+        }
+      ]
+    },
+    {
+      "player": "Joe Ingles",
+      "career_three_pt_percentage": 40.9,
+      "career_three_pt_made": 1224,
+      "career_three_pt_attempts": 2990,
+      "seasons_played": 10,
+      "years_active": "2015-2024",
+      "teams": [
+        "Orlando Magic",
+        "Milwaukee Bucks",
+        "Utah Jazz"
+      ],
+      "position_group": "F",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 202,
+          "three_pt_made": 72,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 35.6,
+          "year": 2015,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 210,
+          "three_pt_made": 81,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 38.6,
+          "year": 2016,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 279,
+          "three_pt_made": 123,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 44.1,
+          "year": 2017,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 464,
+          "three_pt_made": 204,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 44.0,
+          "year": 2018,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 485,
+          "three_pt_made": 189,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 39.0,
+          "year": 2019,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 353,
+          "three_pt_made": 141,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 39.9,
+          "year": 2020,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 408,
+          "three_pt_made": 183,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 44.9,
+          "year": 2021,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 225,
+          "three_pt_made": 78,
+          "team": "Utah Jazz",
+          "position_group": "F",
+          "three_pt_percentage": 34.7,
+          "year": 2022,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 203,
+          "three_pt_made": 83,
+          "team": "Milwaukee Bucks",
+          "position_group": "F",
+          "three_pt_percentage": 40.9,
+          "year": 2023,
+          "player": "Joe Ingles"
+        },
+        {
+          "three_pt_attempts": 161,
+          "three_pt_made": 70,
+          "team": "Orlando Magic",
+          "position_group": "F",
+          "three_pt_percentage": 43.5,
+          "year": 2024,
+          "player": "Joe Ingles"
+        }
+      ]
+    },
+    {
+      "player": "Raja Bell",
+      "career_three_pt_percentage": 40.8,
+      "career_three_pt_made": 922,
+      "career_three_pt_attempts": 2260,
+      "seasons_played": 9,
+      "years_active": "2004-2012",
+      "teams": [
+        "Golden State Warriors",
+        "Phoenix Suns",
+        "Charlotte Bobcats",
+        "Utah Jazz"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 167,
+          "three_pt_made": 62,
+          "team": "Utah Jazz",
+          "position_group": "G",
+          "three_pt_percentage": 37.1,
+          "year": 2004,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 134,
+          "three_pt_made": 54,
+          "team": "Utah Jazz",
+          "position_group": "G",
+          "three_pt_percentage": 40.3,
+          "year": 2005,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 446,
+          "three_pt_made": 197,
+          "team": "Phoenix Suns",
+          "position_group": "G",
+          "three_pt_percentage": 44.2,
+          "year": 2006,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 496,
+          "three_pt_made": 205,
+          "team": "Phoenix Suns",
+          "position_group": "G",
+          "three_pt_percentage": 41.3,
+          "year": 2007,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 439,
+          "three_pt_made": 176,
+          "team": "Phoenix Suns",
+          "position_group": "G",
+          "three_pt_percentage": 40.1,
+          "year": 2008,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 271,
+          "three_pt_made": 114,
+          "team": "Charlotte Bobcats",
+          "position_group": "G",
+          "three_pt_percentage": 42.1,
+          "year": 2009,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 27,
+          "three_pt_made": 12,
+          "team": "Golden State Warriors",
+          "position_group": "G",
+          "three_pt_percentage": 44.4,
+          "year": 2010,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 193,
+          "three_pt_made": 68,
+          "team": "Utah Jazz",
+          "position_group": "G",
+          "three_pt_percentage": 35.2,
+          "year": 2011,
+          "player": "Raja Bell"
+        },
+        {
+          "three_pt_attempts": 87,
+          "three_pt_made": 34,
+          "team": "Utah Jazz",
+          "position_group": "G",
+          "three_pt_percentage": 39.1,
+          "year": 2012,
+          "player": "Raja Bell"
+        }
+      ]
+    },
+    {
+      "player": "Kelenna Azubuike",
+      "career_three_pt_percentage": 40.8,
+      "career_three_pt_made": 209,
+      "career_three_pt_attempts": 512,
+      "seasons_played": 4,
+      "years_active": "2007-2010",
+      "teams": [
+        "Golden State Warriors"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 79,
+          "three_pt_made": 34,
+          "team": "Golden State Warriors",
+          "position_group": "G",
+          "three_pt_percentage": 43.0,
+          "year": 2007,
+          "player": "Kelenna Azubuike"
+        },
+        {
+          "three_pt_attempts": 195,
+          "three_pt_made": 71,
+          "team": "Golden State Warriors",
+          "position_group": "G",
+          "three_pt_percentage": 36.4,
+          "year": 2008,
+          "player": "Kelenna Azubuike"
+        },
+        {
+          "three_pt_attempts": 211,
+          "three_pt_made": 94,
+          "team": "Golden State Warriors",
+          "position_group": "F",
+          "three_pt_percentage": 44.5,
+          "year": 2009,
+          "player": "Kelenna Azubuike"
+        },
+        {
+          "three_pt_attempts": 27,
+          "three_pt_made": 10,
+          "team": "Golden State Warriors",
+          "position_group": "F",
+          "three_pt_percentage": 37.0,
+          "year": 2010,
+          "player": "Kelenna Azubuike"
+        }
+      ]
+    },
+    {
+      "player": "Quinn Cook",
+      "career_three_pt_percentage": 40.8,
+      "career_three_pt_made": 180,
+      "career_three_pt_attempts": 441,
+      "seasons_played": 5,
+      "years_active": "2017-2021",
+      "teams": [
+        "Golden State Warriors",
+        "Cleveland Cavaliers",
+        "Los Angeles Lakers",
+        "New Orleans Pelicans"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 26,
+          "three_pt_made": 11,
+          "team": "New Orleans Pelicans",
+          "position_group": "G",
+          "three_pt_percentage": 42.3,
+          "year": 2017,
+          "player": "Quinn Cook"
+        },
+        {
+          "three_pt_attempts": 104,
+          "three_pt_made": 46,
+          "team": "Golden State Warriors",
+          "position_group": "G",
+          "three_pt_percentage": 44.2,
+          "year": 2018,
+          "player": "Quinn Cook"
+        },
+        {
+          "three_pt_attempts": 200,
+          "three_pt_made": 81,
+          "team": "Golden State Warriors",
+          "position_group": "G",
+          "three_pt_percentage": 40.5,
+          "year": 2019,
+          "player": "Quinn Cook"
+        },
+        {
+          "three_pt_attempts": 85,
+          "three_pt_made": 31,
+          "team": "Los Angeles Lakers",
+          "position_group": "G",
+          "three_pt_percentage": 36.5,
+          "year": 2020,
+          "player": "Quinn Cook"
+        },
+        {
+          "three_pt_attempts": 26,
+          "three_pt_made": 11,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 42.3,
+          "year": 2021,
+          "player": "Quinn Cook"
+        }
+      ]
+    },
+    {
+      "player": "Jose Calderon",
+      "career_three_pt_percentage": 40.7,
+      "career_three_pt_made": 920,
+      "career_three_pt_attempts": 2260,
+      "seasons_played": 14,
+      "years_active": "2006-2019",
+      "teams": [
+        "New York Knicks",
+        "Atlanta Hawks",
+        "Cleveland Cavaliers",
+        "Detroit Pistons",
+        "Toronto Raptors",
+        "Dallas Mavericks"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 43,
+          "three_pt_made": 7,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 16.3,
+          "year": 2006,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 75,
+          "three_pt_made": 25,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 33.3,
+          "year": 2007,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 184,
+          "three_pt_made": 79,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 42.9,
+          "year": 2008,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 202,
+          "three_pt_made": 82,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 40.6,
+          "year": 2009,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 171,
+          "three_pt_made": 68,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 39.8,
+          "year": 2010,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 156,
+          "three_pt_made": 57,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 36.5,
+          "year": 2011,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 159,
+          "three_pt_made": 59,
+          "team": "Toronto Raptors",
+          "position_group": "G",
+          "three_pt_percentage": 37.1,
+          "year": 2012,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 282,
+          "three_pt_made": 130,
+          "team": "Detroit Pistons",
+          "position_group": "G",
+          "three_pt_percentage": 46.1,
+          "year": 2013,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 425,
+          "three_pt_made": 191,
+          "team": "Dallas Mavericks",
+          "position_group": "G",
+          "three_pt_percentage": 44.9,
+          "year": 2014,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 142,
+          "three_pt_made": 59,
+          "team": "New York Knicks",
+          "position_group": "G",
+          "three_pt_percentage": 41.5,
+          "year": 2015,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 203,
+          "three_pt_made": 84,
+          "team": "New York Knicks",
+          "position_group": "G",
+          "three_pt_percentage": 41.4,
+          "year": 2016,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 64,
+          "three_pt_made": 20,
+          "team": "Atlanta Hawks",
+          "position_group": "G",
+          "three_pt_percentage": 31.2,
+          "year": 2017,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 97,
+          "three_pt_made": 45,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 46.4,
+          "year": 2018,
+          "player": "Jose Calderon"
+        },
+        {
+          "three_pt_attempts": 57,
+          "three_pt_made": 14,
+          "team": "Detroit Pistons",
+          "position_group": "G",
+          "three_pt_percentage": 24.6,
+          "year": 2019,
+          "player": "Jose Calderon"
+        }
+      ]
+    },
+    {
+      "player": "Daniel Gibson",
+      "career_three_pt_percentage": 40.7,
+      "career_three_pt_made": 579,
+      "career_three_pt_attempts": 1421,
+      "seasons_played": 7,
+      "years_active": "2007-2013",
+      "teams": [
+        "Cleveland Cavaliers"
+      ],
+      "position_group": "G",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 124,
+          "three_pt_made": 52,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 41.9,
+          "year": 2007,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 270,
+          "three_pt_made": 119,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 44.1,
+          "year": 2008,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 283,
+          "three_pt_made": 108,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 38.2,
+          "year": 2009,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 149,
+          "three_pt_made": 71,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 47.7,
+          "year": 2010,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 293,
+          "three_pt_made": 118,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 40.3,
+          "year": 2011,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 139,
+          "three_pt_made": 55,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 39.6,
+          "year": 2012,
+          "player": "Daniel Gibson"
+        },
+        {
+          "three_pt_attempts": 163,
+          "three_pt_made": 56,
+          "team": "Cleveland Cavaliers",
+          "position_group": "G",
+          "three_pt_percentage": 34.4,
+          "year": 2013,
+          "player": "Daniel Gibson"
+        }
+      ]
+    },
+    {
+      "player": "Wally Szczerbiak",
+      "career_three_pt_percentage": 40.4,
+      "career_three_pt_made": 389,
+      "career_three_pt_attempts": 964,
+      "seasons_played": 6,
+      "years_active": "2004-2009",
+      "teams": [
+        "Minnesota Timberwolves",
+        "Boston Celtics",
+        "Cleveland Cavaliers"
+      ],
+      "position_group": "F",
+      "seasons_data": [
+        {
+          "three_pt_attempts": 46,
+          "three_pt_made": 20,
+          "team": "Minnesota Timberwolves",
+          "position_group": "F",
+          "three_pt_percentage": 43.5,
+          "year": 2004,
+          "player": "Wally Szczerbiak"
+        },
+        {
+          "three_pt_attempts": 170,
+          "three_pt_made": 63,
+          "team": "Minnesota Timberwolves",
+          "position_group": "F",
+          "three_pt_percentage": 37.1,
+          "year": 2005,
+          "player": "Wally Szczerbiak"
+        },
+        {
+          "three_pt_attempts": 256,
+          "three_pt_made": 103,
+          "team": "Boston Celtics",
+          "position_group": "F",
+          "three_pt_percentage": 40.2,
+          "year": 2006,
+          "player": "Wally Szczerbiak"
+        },
+        {
+          "three_pt_attempts": 106,
+          "three_pt_made": 44,
+          "team": "Boston Celtics",
+          "position_group": "F",
+          "three_pt_percentage": 41.5,
+          "year": 2007,
+          "player": "Wally Szczerbiak"
+        },
+        {
+          "three_pt_attempts": 218,
+          "three_pt_made": 90,
+          "team": "Cleveland Cavaliers",
+          "position_group": "F",
+          "three_pt_percentage": 41.3,
+          "year": 2008,
+          "player": "Wally Szczerbiak"
+        },
+        {
+          "three_pt_attempts": 168,
+          "three_pt_made": 69,
+          "team": "Cleveland Cavaliers",
+          "position_group": "F",
+          "three_pt_percentage": 41.1,
+          "year": 2009,
+          "player": "Wally Szczerbiak"
         }
       ]
     }
