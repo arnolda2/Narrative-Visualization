@@ -1268,7 +1268,22 @@ function drawScene3_Efficiency() {
 }
 
 function drawScene4_Explorer() {
-    updateExplorerVisualization();
+    console.log('🎨 Initializing Enhanced NBA Explorer...');
+    
+    // Hide main visualization for enhanced explorer
+    d3.select('#main-visualization').style('display', 'none');
+    
+    // Initialize the advanced explorer
+    if (window.nbaAdvancedExplorer) {
+        window.nbaAdvancedExplorer.initialize().catch(error => {
+            console.error('Failed to initialize enhanced explorer:', error);
+            // Fallback to basic explorer
+            updateExplorerVisualization();
+        });
+    } else {
+        console.warn('Enhanced explorer not loaded, using basic version');
+        updateExplorerVisualization();
+    }
 }
 
 function updateExplorerVisualization() {
