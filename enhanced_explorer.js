@@ -61,10 +61,15 @@ class NBAAdvancedExplorer {
         // Set initial view based on main UI state
         if (window.state && window.state.analysisType) {
             this.currentView = window.state.analysisType === 'players' ? 'players' : 'teams';
+            console.log(`🎯 Set initial view from main UI state: ${this.currentView} (analysisType: ${window.state.analysisType})`);
+        } else {
+            console.log(`🎯 Using default view: ${this.currentView} (no main UI state found)`);
         }
         
         // Bind team selection listeners after UI is populated
         this.bindTeamSelectionListeners();
+        // Bind player selection listeners after UI is populated
+        this.bindShooterSelectionListeners();
         this.updateViewSections();
     }
 
@@ -329,8 +334,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             });
         }
 
-        // Top shooters selection
-        this.bindShooterSelectionListeners();
+        // Top shooters selection will be bound after UI is populated
 
         // Era buttons
         document.querySelectorAll('.era-btn').forEach(btn => {
@@ -401,23 +405,31 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
     bindShooterSelectionListeners() {
         // Bind shooters section player cards
-        document.querySelectorAll('.player-card').forEach(card => {
+        const playerCards = document.querySelectorAll('.player-card');
+        console.log('Binding shooters section player cards:', playerCards.length);
+        playerCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 const player = e.currentTarget.dataset.player;
+                console.log('Player card clicked:', player);
                 this.togglePlayerSelection(player, e.currentTarget, true);
             });
         });
         
         // Bind player list options  
-        document.querySelectorAll('.player-list-option').forEach(option => {
+        const playerListOptions = document.querySelectorAll('.player-list-option');
+        console.log('Binding player list options:', playerListOptions.length);
+        playerListOptions.forEach(option => {
             option.addEventListener('click', (e) => {
                 const player = e.currentTarget.dataset.player;
+                console.log('Player list option clicked:', player);
                 this.togglePlayerSelection(player, e.currentTarget, false);
             });
         });
     },
 
     togglePlayerSelection(player, element, isShooterCard) {
+        console.log(`🏀 Toggle player selection: ${player}, currently selected:`, Array.from(this.selectedPlayers));
+        
         if (this.selectedPlayers.has(player)) {
             this.selectedPlayers.delete(player);
             element.classList.remove('selected');
@@ -429,6 +441,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 element.style.color = 'black';
                 element.style.border = '2px solid #e2e8f0';
             }
+            console.log(`📤 Removed ${player}, now selected:`, Array.from(this.selectedPlayers));
         } else {
             this.selectedPlayers.add(player);
             element.classList.add('selected');
@@ -440,11 +453,13 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 element.style.color = 'white';
                 element.style.border = '2px solid #ea580c';
             }
+            console.log(`📥 Added ${player}, now selected:`, Array.from(this.selectedPlayers));
         }
         
         // Update both displays to keep them in sync
         this.syncPlayerSelections();
         this.updateSelectedPlayersDisplay();
+        console.log(`🔄 Calling updateVisualization for player selection change...`);
         this.updateVisualization();
     },
 
@@ -653,6 +668,8 @@ if (typeof module !== 'undefined' && module.exports) {
 Object.assign(NBAAdvancedExplorer.prototype, {
     
     updateVisualization() {
+        console.log(`📈 updateVisualization called with currentView: ${this.currentView}`);
+        
         const svg = d3.select('#advanced-main-chart');
         svg.selectAll('*').remove();
 
@@ -671,14 +688,19 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         switch (this.currentView) {
             case 'teams':
+                console.log('📊 Drawing team trends');
                 this.drawTeamTrends(g, chartWidth, chartHeight);
                 break;
             case 'players':
+                console.log('📊 Drawing player comparison');
                 this.drawPlayerComparison(g, chartWidth, chartHeight);
                 break;
             case 'shooters':
+                console.log('📊 Drawing shooter analysis');
                 this.drawShooterAnalysis(g, chartWidth, chartHeight);
                 break;
+            default:
+                console.log(`⚠️ Unknown view: ${this.currentView}`);
         }
 
         this.updateInsights();
@@ -697,6 +719,16 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             this.currentView = newView;
             console.log(`🔄 Enhanced explorer view switched to: ${newView}`);
             this.updateViewSections();
+            
+            // Re-bind listeners when switching to players view
+            if (newView === 'players') {
+                console.log('Re-binding player selection listeners...');
+                this.bindShooterSelectionListeners();
+            } else if (newView === 'teams') {
+                console.log('Re-binding team selection listeners...');
+                this.bindTeamSelectionListeners();
+            }
+            
             this.updateVisualization();
         }
     },
@@ -878,7 +910,10 @@ Object.assign(NBAAdvancedExplorer.prototype, {
     },
 
     drawPlayerComparison(g, width, height) {
+        console.log(`📊 drawPlayerComparison called with ${this.selectedPlayers.size} selected players:`, Array.from(this.selectedPlayers));
+        
         if (this.selectedPlayers.size === 0) {
+            console.log('📋 No players selected, showing instruction text');
             g.append('text')
                 .attr('x', width / 2)
                 .attr('y', height / 2)
