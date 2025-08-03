@@ -690,6 +690,14 @@ function drawScene0_Overview() {
             content: `${utils.formatNumber(data['2024'].total_shots)} total shots analyzed in 2024 season vs ${utils.formatNumber(data['2004'].total_shots)} in 2004.`
         }
     ]);
+    
+    console.log('✅ Scene 0 completed successfully');
+    
+    } catch (error) {
+        console.error('❌ Error in drawScene0_Overview:', error);
+        showError(`Failed to render overview scene: ${error.message}`);
+        throw error;
+    }
 }
 
 // Scene 1: Enhanced Evolution Timeline with fixed x-axis
