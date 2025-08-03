@@ -1579,23 +1579,35 @@ function initializeSearchControls() {
     const playerDropdown = document.getElementById('player-dropdown');
     const teamDropdown = document.getElementById('team-dropdown');
 
-    // Player search
-    playerSearch.addEventListener('input', (e) => {
-        showSearchResults(e.target.value, state.availablePlayers, playerDropdown, 'player');
-    });
+    // Safe event listener binding with existence checks
+    if (playerSearch && playerDropdown) {
+        playerSearch.addEventListener('input', (e) => {
+            showSearchResults(e.target.value, state.availablePlayers, playerDropdown, 'player');
+        });
+        console.log('✅ Player search controls initialized');
+    } else {
+        console.warn('⚠️ Player search elements not found - explorer may not be active');
+    }
 
-    // Team search  
-    teamSearch.addEventListener('input', (e) => {
-        showSearchResults(e.target.value, state.availableTeams, teamDropdown, 'team');
-    });
+    if (teamSearch && teamDropdown) {
+        teamSearch.addEventListener('input', (e) => {
+            showSearchResults(e.target.value, state.availableTeams, teamDropdown, 'team');
+        });
+        console.log('✅ Team search controls initialized');
+    } else {
+        console.warn('⚠️ Team search elements not found - explorer may not be active');
+    }
 
-    // Hide dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-container')) {
-            playerDropdown.classList.remove('show');
-            teamDropdown.classList.remove('show');
-        }
-    });
+    // Document click handler (safe since it's on document) - only if dropdowns exist
+    if (playerDropdown && teamDropdown) {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                playerDropdown.classList.remove('show');
+                teamDropdown.classList.remove('show');
+            }
+        });
+        console.log('✅ Search dropdown handlers initialized');
+    }
 }
 
 function showSearchResults(query, items, dropdown, type) {
