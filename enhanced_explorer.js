@@ -18,11 +18,14 @@ class NBAAdvancedExplorer {
 
     async initialize() {
         try {
-            console.log('🏀 Initializing Enhanced NBA Explorer...');
+            console.log('🚀 Initializing Enhanced NBA Explorer...');
+            console.log('🌐 Current window.state:', window.state);
             await this.loadMasterData();
             this.setupAdvancedUI();
             this.updateVisualization();
             console.log('✅ Enhanced NBA Explorer initialized successfully');
+            console.log('🎯 Final currentView:', this.currentView);
+            console.log('📊 Selected players:', Array.from(this.selectedPlayers));
         } catch (error) {
             console.error('❌ Failed to initialize enhanced explorer:', error);
             this.showError('Failed to load master dataset');
@@ -259,7 +262,21 @@ Object.assign(NBAAdvancedExplorer.prototype, {
     },
 
     populatePlayerList() {
+        console.log('🏀 populatePlayerList called');
         const container = document.getElementById('player-list-container');
+        console.log('📦 player-list-container element:', container);
+        console.log('📊 topShooters data:', this.topShooters ? this.topShooters.length : 'null');
+        
+        if (!container) {
+            console.error('❌ player-list-container element not found!');
+            return;
+        }
+        
+        if (!this.topShooters) {
+            console.error('❌ No topShooters data available!');
+            return;
+        }
+        
         container.innerHTML = this.topShooters.map((shooter, index) => `
             <div class="player-list-option ${this.selectedPlayers.has(shooter.player) ? 'selected' : ''}" 
                  data-player="${shooter.player}"
@@ -275,6 +292,8 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 </div>
             </div>
         `).join('');
+        
+        console.log('✅ populatePlayerList completed, container innerHTML length:', container.innerHTML.length);
     },
 
     bindEventListeners() {
