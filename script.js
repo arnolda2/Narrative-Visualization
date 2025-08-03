@@ -79,14 +79,42 @@ const scenes = [
 const utils = {
     // Responsive SVG setup
     setupSVG: function(selector, width = CONFIG.width, height = CONFIG.height) {
-        d3.select(selector).selectAll("*").remove();
-        
         const container = d3.select(selector);
-        const containerRect = container.node().getBoundingClientRect();
+        
+        // Validate container exists
+        if (container.empty()) {
+            throw new Error(`SVG container element not found: ${selector}`);
+        }
+        
+        // Clear existing content
+        container.selectAll("*").remove();
+        
+        // Get container dimensions safely
+        const containerNode = container.node();
+        if (!containerNode) {
+            throw new Error(`Container node is null: ${selector}`);
+        }
+        
+        let containerWidth;
+        try {
+            const containerRect = containerNode.getBoundingClientRect();
+            containerWidth = containerRect.width;
+            
+            // Fallback if container has no dimensions
+            if (containerWidth === 0) {
+                console.warn(`Container ${selector} has zero width, using parent or default`);
+                const parent = containerNode.parentElement;
+                containerWidth = parent ? parent.getBoundingClientRect().width : 1000;
+            }
+        } catch (error) {
+            console.warn(`Could not get container dimensions for ${selector}, using default:`, error);
+            containerWidth = 1000;
+        }
+        
         const aspectRatio = width / height;
         
-        // Responsive width calculation
-        const responsiveWidth = Math.min(width, containerRect.width - 40);
+        // Responsive width calculation with minimum size
+        const responsiveWidth = Math.min(width, Math.max(containerWidth - 40, 300));
         const responsiveHeight = responsiveWidth / aspectRatio;
         
         const svg = container
@@ -479,8 +507,16 @@ function drawCurrentScene() {
 
 // Scene 0: Enhanced Overview with better design
 function drawScene0_Overview() {
-    const { svg, g, width, height } = utils.setupSVG('#main-visualization');
-    const data = state.data.scene1;
+    try {
+        console.log('🎨 Drawing Scene 0: Overview');
+        const { svg, g, width, height } = utils.setupSVG('#main-visualization');
+        console.log('✅ SVG setup complete');
+        
+        const data = state.data.scene1;
+        if (!data) {
+            throw new Error('Scene1 data is missing');
+        }
+        console.log('✅ Scene1 data loaded:', data);
     
     // Create enhanced comparison data
     const comparisonData = [

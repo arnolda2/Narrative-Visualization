@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🏀 NBA Dashboard Debug Test</h1>
+    <div id="status-container"></div>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        const statusContainer = document.getElementById('status-container');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusContainer.appendChild(div);
+            console.log(message);
+        }
+        
+        async function testDataLoading() {
+            addStatus('🚀 Starting data loading test...', 'info');
+            
+            try {
+                // Test D3 availability
+                if (typeof d3 === 'undefined') {
+                    throw new Error('D3.js is not loaded');
+                }
+                addStatus('✅ D3.js loaded successfully', 'success');
+                
+                // Test each data file individually
+                const files = ['scene1_data.json', 'scene2_data.json', 'scene3_data.json', 'scene4_data.json'];
+                
+                for (const file of files) {
+                    try {
+                        addStatus(`📥 Loading ${file}...`, 'info');
+                        const data = await d3.json(`data/${file}`);
+                        addStatus(`✅ ${file} loaded - ${typeof data} with ${Array.isArray(data) ? data.length : Object.keys(data).length} items`, 'success');
+                    } catch (error) {
+                        addStatus(`❌ Failed to load ${file}: ${error.message}`, 'error');
+                        throw error;
+                    }
+                }
+                
+                // Test parallel loading (like in the main script)
+                addStatus('🔄 Testing parallel loading...', 'info');
+                const [scene1, scene2, scene3, scene4] = await Promise.all([
+                    d3.json('data/scene1_data.json'),
+                    d3.json('data/scene2_data.json'),
+                    d3.json('data/scene3_data.json'),
+                    d3.json('data/scene4_data.json')
+                ]);
+                
+                addStatus('✅ All data loaded successfully via Promise.all', 'success');
+                
+                // Test data structure
+                addStatus('🔍 Testing data structure...', 'info');
+                
+                if (!Array.isArray(scene2)) {
+                    throw new Error('Scene2 data should be an array');
+                }
+                addStatus(`✅ Scene2 has ${scene2.length} league seasons`, 'success');
+                
+                if (!Array.isArray(scene3)) {
+                    throw new Error('Scene3 data should be an array');
+                }
+                addStatus(`✅ Scene3 has ${scene3.length} players`, 'success');
+                
+                addStatus('🎉 ALL TESTS PASSED! Data loading should work.', 'success');
+                
+            } catch (error) {
+                addStatus(`💥 TEST FAILED: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', testDataLoading);
+    </script>
+</body>
+</html>
