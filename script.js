@@ -1284,6 +1284,9 @@ function drawScene4_Explorer() {
         console.warn('Enhanced explorer not loaded, using basic version');
         updateExplorerVisualization();
     }
+    
+    // Setup analysis type toggle functionality
+    setupAnalysisToggle();
 }
 
 function updateExplorerVisualization() {
@@ -2054,6 +2057,59 @@ function highlightTimelineYear(year) {
     d3.selectAll('.timeline-point')
         .attr('stroke-width', d => d.season === year ? 4 : 2)
         .attr('stroke', d => d.season === year ? CONFIG.colors.accent : CONFIG.colors.background);
+}
+
+function setupAnalysisToggle() {
+    // Setup analysis type toggle buttons
+    d3.selectAll('.analysis-btn').on('click', function() {
+        // Remove active class from all buttons
+        d3.selectAll('.analysis-btn').classed('active', false);
+        
+        // Add active class to clicked button
+        d3.select(this).classed('active', true);
+        
+        // Get the analysis type
+        const type = this.dataset.type;
+        
+        // Show/hide appropriate controls
+        if (type === 'players') {
+            d3.select('#player-controls').style('display', 'block');
+            d3.select('#team-controls').style('display', 'none');
+            d3.select('#chart-title').text('Player Evolution Analysis');
+            d3.select('#stats-title').text('Player Statistics');
+        } else if (type === 'teams') {
+            d3.select('#player-controls').style('display', 'none');
+            d3.select('#team-controls').style('display', 'block');
+            d3.select('#chart-title').text('Team Strategy Evolution');
+            d3.select('#stats-title').text('Team Statistics');
+        }
+        
+        // Update visualization if enhanced explorer is available
+        if (window.nbaAdvancedExplorer && window.nbaAdvancedExplorer.updateVisualization) {
+            window.nbaAdvancedExplorer.updateVisualization();
+        }
+    });
+    
+    // Setup conference toggle buttons
+    d3.selectAll('.conference-tab').on('click', function() {
+        // Remove active class from all tabs
+        d3.selectAll('.conference-tab').classed('active', false);
+        
+        // Add active class to clicked tab
+        d3.select(this).classed('active', true);
+        
+        // Get the conference
+        const conference = this.dataset.conference;
+        
+        // Show/hide appropriate divisions
+        d3.selectAll('.division-grid').style('display', 'none');
+        
+        if (conference === 'Eastern Conference') {
+            d3.select('#eastern-divisions').style('display', 'grid');
+        } else {
+            d3.select('#western-divisions').style('display', 'grid');
+        }
+    });
 }
 
 // Export for debugging
