@@ -362,9 +362,11 @@ function initializeEventListeners() {
         });
     });
     
-    // Navigation buttons
-    document.getElementById('prev-btn').addEventListener('click', () => changeScene(state.currentScene - 1));
-    document.getElementById('next-btn').addEventListener('click', () => changeScene(state.currentScene + 1));
+    // Navigation buttons - safe access
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    if (prevBtn) prevBtn.addEventListener('click', () => changeScene(state.currentScene - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => changeScene(state.currentScene + 1));
     
     // Analysis type toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
@@ -380,18 +382,25 @@ function initializeEventListeners() {
     // Search functionality
     initializeSearchControls();
     
-    // Year sliders
-    document.getElementById('start-year').addEventListener('input', (e) => {
-        state.startYear = parseInt(e.target.value);
-        document.getElementById('start-year-label').textContent = state.startYear;
-        if (state.currentScene === 4) updateExplorerVisualization();
-    });
-    
-    document.getElementById('end-year').addEventListener('input', (e) => {
-        state.endYear = parseInt(e.target.value);
-        document.getElementById('end-year-label').textContent = state.endYear;
-        if (state.currentScene === 4) updateExplorerVisualization();
-    });
+    // Year sliders - safe access
+    const startYear = document.getElementById('start-year');
+    const endYear = document.getElementById('end-year');
+    if (startYear) {
+        startYear.addEventListener('input', (e) => {
+            state.startYear = parseInt(e.target.value);
+            const label = document.getElementById('start-year-label');
+            if (label) label.textContent = state.startYear;
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
+    }
+    if (endYear) {
+        endYear.addEventListener('input', (e) => {
+            state.endYear = parseInt(e.target.value);
+            const label = document.getElementById('end-year-label');
+            if (label) label.textContent = state.endYear;
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
+    }
     
     // View toggles
     document.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -404,19 +413,25 @@ function initializeEventListeners() {
         });
     });
 
-    // Filter controls
-    document.getElementById('playoff-only').addEventListener('change', (e) => {
-        state.filters.playoffOnly = e.target.checked;
-        if (state.currentScene === 4) updateExplorerVisualization();
-    });
+    // Filter controls - safe access
+    const playoffOnly = document.getElementById('playoff-only');
+    const winningTeams = document.getElementById('winning-teams');
+    if (playoffOnly) {
+        playoffOnly.addEventListener('change', (e) => {
+            state.filters.playoffOnly = e.target.checked;
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
+    }
+    if (winningTeams) {
+        winningTeams.addEventListener('change', (e) => {
+            state.filters.winningTeams = e.target.checked;
+            if (state.currentScene === 4) updateExplorerVisualization();
+        });
+    }
     
-    document.getElementById('winning-teams').addEventListener('change', (e) => {
-        state.filters.winningTeams = e.target.checked;
-        if (state.currentScene === 4) updateExplorerVisualization();
-    });
-    
-    // Timeline play button
-    document.getElementById('play-btn').addEventListener('click', toggleTimelineAnimation);
+    // Timeline play button - safe access
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) playBtn.addEventListener('click', toggleTimelineAnimation);
     
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
