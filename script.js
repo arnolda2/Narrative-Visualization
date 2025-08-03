@@ -149,13 +149,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     showLoading();
     
     try {
+        console.log('🏀 Starting NBA Dashboard initialization...');
+        
         await loadAllData();
+        console.log('✅ Data loaded successfully');
+        
         initializeEventListeners();
+        console.log('✅ Event listeners initialized');
+        
         updateScene();
+        console.log('✅ Initial scene rendered');
+        
         hideLoading();
+        console.log('🎉 NBA Dashboard fully loaded!');
+        
     } catch (error) {
-        console.error('Failed to load application:', error);
-        showError('Failed to load NBA data. Please refresh the page.');
+        console.error('❌ Failed to load application:', error);
+        showError(`Failed to load NBA data: ${error.message}<br><br>Please check your internet connection and refresh the page.`);
     }
 });
 
@@ -262,30 +272,48 @@ function selectTeam(teamName) {
 }
 
 function enhanceDataWithCalculations() {
-    // Add trend calculations, player rankings, etc.
-    const leagueData = state.data.scene2;
-    
-    // Calculate year-over-year changes
-    leagueData.forEach((d, i) => {
-        if (i > 0) {
-            d.threePtChange = d.three_pt_rate - leagueData[i-1].three_pt_rate;
-            d.efficiencyChange = d.efg_percentage - leagueData[i-1].efg_percentage;
-        } else {
-            d.threePtChange = 0;
-            d.efficiencyChange = 0;
+    try {
+        console.log('🔄 Enhancing data with calculations...');
+        
+        // Add trend calculations, player rankings, etc.
+        const leagueData = state.data.scene2;
+        
+        if (!leagueData || !Array.isArray(leagueData)) {
+            throw new Error('Scene2 data is missing or invalid');
         }
-    });
-    
-    // Enhance player data
-    state.data.scene3.forEach(player => {
-        player.seasons.forEach((season, i) => {
+        
+        // Calculate year-over-year changes
+        leagueData.forEach((d, i) => {
             if (i > 0) {
-                season.careerProgression = season.three_pt_rate - player.seasons[0].three_pt_rate;
+                d.threePtChange = d.three_pt_rate - leagueData[i-1].three_pt_rate;
+                d.efficiencyChange = d.efg_percentage - leagueData[i-1].efg_percentage;
             } else {
-                season.careerProgression = 0;
+                d.threePtChange = 0;
+                d.efficiencyChange = 0;
             }
         });
-    });
+        
+        // Enhance player data
+        if (state.data.scene3 && Array.isArray(state.data.scene3)) {
+            state.data.scene3.forEach(player => {
+                if (player.seasons && Array.isArray(player.seasons)) {
+                    player.seasons.forEach((season, i) => {
+                        if (i > 0) {
+                            season.careerProgression = season.three_pt_rate - player.seasons[0].three_pt_rate;
+                        } else {
+                            season.careerProgression = 0;
+                        }
+                    });
+                }
+            });
+        }
+        
+        console.log('✅ Data enhancement complete');
+        
+    } catch (error) {
+        console.error('❌ Error enhancing data:', error);
+        throw error;
+    }
 }
 
 // Event listeners
@@ -1863,7 +1891,38 @@ function hideLoading() {
 
 function showError(message) {
     console.error(message);
-    // Implement error display
+    hideLoading();
+    
+    // Create error display
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        text-align: center;
+        z-index: 10000;
+        font-family: Inter, sans-serif;
+    `;
+    errorDiv.innerHTML = `
+        <h3 style="margin: 0 0 10px 0; color: #991b1b;">⚠️ Error Loading Visualization</h3>
+        <p style="margin: 0 0 15px 0;">${message}</p>
+        <button onclick="location.reload()" style="
+            background: #dc2626; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer;
+        ">🔄 Refresh Page</button>
+    `;
+    document.body.appendChild(errorDiv);
 }
 
 function toggleTimelineAnimation() {
