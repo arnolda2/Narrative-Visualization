@@ -50,7 +50,7 @@ let state = {
 const scenes = [
     {
         title: "The Great Transformation",
-        subtitle: "From mid-range masters to three-point revolutionaries - see how basketball fundamentally changed",
+        subtitle: "From mid-range shooting to three-point shots - see how basketball fundamentally changed",
         content: "In 2004, NBA teams took just 18.7% of their shots from beyond the arc. By 2024, that number skyrocketed to 39.5% - more than doubling in just two decades."
     },
     {
@@ -60,12 +60,12 @@ const scenes = [
     },
     {
         title: "Revolutionary Players",
-        subtitle: "Meet the sharpshooters who led the charge and redefined basketball",
+        subtitle: "Steph Curry, the sharpshooter, who led the charge and redefined basketball",
         content: "Stephen Curry's record-breaking 402 made threes in 2015-16 wasn't just a record - it was a statement that changed how every team approaches offense."
     },
     {
         title: "The Efficiency Revolution", 
-        subtitle: "Why teams embraced the three-pointer: it's simply more effective",
+        subtitle: "How three-point shooting became increasingly effective over time",
         content: "As teams shifted from mid-range to three-point shots, league-wide scoring efficiency reached historic highs. The math is simple: 3 > 2."
     },
     {

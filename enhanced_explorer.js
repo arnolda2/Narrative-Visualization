@@ -891,10 +891,11 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         // Debug: Check selected players and available player data
         console.log('Selected players:', Array.from(this.selectedPlayers));
-        console.log('Available players in master data:', this.data.player_data ? this.data.player_data.map(p => p.player) : 'No player_data');
+        console.log('Available top shooters:', this.topShooters ? this.topShooters.map(p => p.player) : 'No topShooters');
         
+        // Use topShooters data directly since it has the correct structure with seasons_data
         const selectedPlayerData = Array.from(this.selectedPlayers).map(playerName => {
-            return this.data.player_data ? this.data.player_data.find(p => p.player === playerName) : null;
+            return this.topShooters ? this.topShooters.find(p => p.player === playerName) : null;
         }).filter(Boolean);
         
         console.log('Found player data for:', selectedPlayerData.map(p => p.player));
@@ -912,7 +913,9 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         const allSeasons = [];
         selectedPlayerData.forEach(player => {
-            player.seasons.forEach(season => {
+            // Use seasons_data from topShooters instead of seasons from master data
+            const playerSeasons = player.seasons_data || player.seasons || [];
+            playerSeasons.forEach(season => {
                 if (season.year >= this.timeRange.start && season.year <= this.timeRange.end) {
                     allSeasons.push({
                         ...season,
@@ -966,7 +969,9 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             .curve(d3.curveMonotoneX);
 
         selectedPlayerData.forEach((player, index) => {
-            const playerSeasons = player.seasons.filter(s => 
+            // Use seasons_data from topShooters instead of seasons from master data
+            const allPlayerSeasons = player.seasons_data || player.seasons || [];
+            const playerSeasons = allPlayerSeasons.filter(s => 
                 s.year >= this.timeRange.start && s.year <= this.timeRange.end
             );
 
