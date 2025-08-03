@@ -156,11 +156,15 @@ The visualization employs a **unified visual language** across all scenes to ens
 - **Navigation Aid**: Correlation annotations connect efficiency to three-point adoption
 - **Transition Prep**: Provides context for interactive exploration
 
-#### Scene 4: Interactive Explorer
-- **Visual Format**: Multiple configurable chart types
-- **Focus Mechanism**: Real-time updates based on user selections
-- **Navigation Aid**: Comprehensive control panel with clear affordances
-- **Exploration Support**: Rich tooltips and statistical summaries
+#### Scene 4: Enhanced Interactive Explorer
+- **Visual Format**: Dual-mode analysis system with dedicated layouts for team trends and player comparison
+- **Focus Mechanism**: Dynamic visualization switching based on analysis type selection (Teams/Players)
+- **Navigation Aid**: Three-column layout with filters (left), visualization (center), and insights (right)
+- **Exploration Support**: 
+  - **Team Analysis**: Conference-based organization with multi-team selection
+  - **Player Analysis**: Top 30 elite shooters with career statistics and multi-player comparison
+  - **Interactive Elements**: Real-time trend lines, hover tooltips, synchronized selections
+  - **Professional UI**: Glass morphism design with responsive controls
 
 ### Visual Clarity Assurance
 
@@ -319,10 +323,13 @@ The visualization employs **d3-annotation library** for standardized annotation 
 - **Causal connections** linking three-point adoption to efficiency improvements
 - **Statistical significance** quantifying the magnitude of efficiency gains
 
-#### Scene 4 Annotations
-- **Dynamic annotations** that update based on user selections
-- **Instructional guidance** helping users understand available interactions
-- **Contextual statistics** providing relevant information for selected parameters
+#### Scene 4 Enhanced Explorer Annotations
+- **Interactive Tooltips**: Rich hover information displaying career statistics, seasonal data, and team information
+- **Selection Feedback**: Real-time annotations showing number of selected players/teams and their combined statistics
+- **Contextual Insights**: Dynamic text panels updating based on current selections and analysis mode
+- **Statistical Summaries**: Automatically calculated comparisons, averages, and trend indicators
+- **Instructional Guidance**: Progressive hints and tips for using advanced features
+- **Performance Metrics**: Live updates of three-point percentages, career totals, and ranking information
 
 ### Annotation Behavior and Interactivity
 
@@ -359,25 +366,31 @@ The visualization maintains a comprehensive state management system controlling 
 - **Purpose**: Defines the scope of the narrative visualization
 - **Usage**: Boundary checking for navigation, progress calculation
 
-#### Interactive Exploration Parameters
+#### Enhanced Explorer Parameters
 
-**`selectedPlayer` (String)**
-- **Purpose**: Controls which player's data is displayed in Scene 4
-- **Default State**: "Stephen Curry" (connects to Scene 2 narrative)
-- **State Changes**: Modified by dropdown selection in explorer controls
-- **Impact**: Updates player evolution chart, statistics panel, efficiency analysis
+**`selectedPlayers` (Set)**
+- **Purpose**: Tracks multiple selected players for comparison analysis
+- **Default State**: Empty set
+- **State Changes**: Modified by clicking players in top 30 list or elite shooters section
+- **Impact**: Updates player comparison chart with multiple trend lines, synchronizes UI selections
 
-**`startYear` and `endYear` (Integers: 2004-2024)**
-- **Purpose**: Define temporal bounds for exploratory analysis
-- **Default State**: Full range (2004-2024)
-- **State Changes**: Modified by dual-range sliders in explorer controls
-- **Impact**: Filters data for all exploratory visualizations, updates statistical calculations
+**`selectedTeams` (Set)**
+- **Purpose**: Tracks multiple selected teams for trend analysis
+- **Default State**: Empty set
+- **State Changes**: Modified by clicking teams in conference-organized filters
+- **Impact**: Updates team trends chart with multiple team data, color-coded visualizations
 
-**`viewMode` (String: "evolution" | "comparison" | "heatmap")**
-- **Purpose**: Controls visualization type in Scene 4 explorer
-- **Default State**: "evolution" (most directly connected to main narrative)
-- **State Changes**: Modified by toggle buttons in explorer controls
-- **Impact**: Switches between different analytical perspectives
+**`currentView` (String: "teams" | "players" | "shooters")**
+- **Purpose**: Controls which analysis mode is active in enhanced explorer
+- **Default State**: "teams" (primary analysis mode)
+- **State Changes**: Modified by analysis type buttons and view switching controls
+- **Impact**: Switches entire UI layout, available controls, and visualization type
+
+**`timeRange` (Object: {start: 2004, end: 2024})**
+- **Purpose**: Defines temporal bounds for all exploratory analysis
+- **Default State**: Full range covering all available data
+- **State Changes**: Modified by era buttons and range controls
+- **Impact**: Filters all player/team data, recalculates statistics, updates visualizations
 
 #### Animation and Interaction Parameters
 
@@ -393,17 +406,27 @@ The visualization maintains a comprehensive state management system controlling 
 
 ### Parameter Usage in State Definition
 
-**Scene State Management:**
-Each scene represents a distinct state of the visualization defined by:
+**Enhanced State Management:**
+The visualization uses a dual-state system with separate objects for narrative and explorer:
 ```javascript
+// Legacy narrative state (script.js)
 state = {
-    currentScene: 0,           // Defines which narrative scene
-    selectedPlayer: 'Stephen Curry',  // Defines focus player
-    startYear: 2004,           // Defines temporal lower bound  
-    endYear: 2024,             // Defines temporal upper bound
-    viewMode: 'evolution',     // Defines analytical perspective
-    isPlaying: false,          // Defines animation state
-    data: {...}                // Contains all processed datasets
+    currentScene: 0,               // Defines which narrative scene
+    analysisType: 'players',       // Communicates with enhanced explorer
+    selectedPlayers: ['Stephen Curry'], // Legacy single selections
+    selectedTeams: ['Golden State Warriors'],
+    isPlaying: false,              // Timeline animation state
+    data: {...}                    // Scene-specific datasets
+}
+
+// Enhanced explorer state (enhanced_explorer.js)  
+explorerState = {
+    currentView: 'players',        // teams | players | shooters
+    selectedPlayers: Set(['Luke Kennard', 'Joe Harris']), // Multi-selection
+    selectedTeams: Set(['Golden State Warriors', 'Houston Rockets']),
+    timeRange: {start: 2004, end: 2024}, // Temporal filtering
+    data: {...},                   // Master dataset
+    topShooters: [...]             // Top 30 elite shooters
 }
 ```
 
@@ -420,10 +443,11 @@ state = {
 ### Parameter Interaction and Dependencies
 
 **Cascading Updates:**
-- `currentScene` changes trigger updates to navigation, content, and available interactions
-- `selectedPlayer` changes update statistics, charts, and contextual information
-- Time range changes (`startYear`, `endYear`) filter data across multiple visualizations
-- `viewMode` changes swap entire analytical frameworks while maintaining other parameters
+- `currentScene` changes trigger complete UI transitions, load different datasets, update navigation states
+- `analysisType` changes communicate between legacy and enhanced systems, switch explorer modes
+- `selectedPlayers` / `selectedTeams` (Sets) trigger real-time visualization updates, color-coded trend lines
+- `currentView` changes swap analysis modes, show/hide relevant UI sections, rebind event listeners
+- `timeRange` changes filter all temporal data, recalculate career statistics, update chart domains
 
 **Validation and Constraints:**
 - **Temporal Logic**: `endYear` automatically adjusts if set before `startYear`
@@ -479,37 +503,47 @@ The visualization provides multiple trigger mechanisms connecting user actions t
   - Works from any focus state
   - Provides accessibility compliance
 
-#### Interactive Exploration Triggers
+#### Enhanced Explorer Triggers
 
-**Player Selection Dropdown**
-- **Trigger**: Change event on select element
-- **Parameter Modified**: `selectedPlayer`
-- **State Change**: Updates all player-specific visualizations and statistics
+**Analysis Type Selection**
+- **Trigger**: Click events on "Players" / "Teams" buttons
+- **Parameters Modified**: `analysisType` (legacy), `currentView` (enhanced)
+- **State Change**: Switches between team trends and player comparison modes
 - **Affordances**:
-  - Modern select styling with clear typography
-  - Descriptive label "Select a Player"
-  - Pre-populated with featured players
-  - Immediate visual feedback on selection
+  - Clear visual distinction with basketball/arena icons
+  - Active state highlighting (orange background, white text)
+  - Immediate UI layout changes provide feedback
+  - Synchronized state between dual systems
 
-**Year Range Sliders**
-- **Trigger**: Input events on dual-range sliders
-- **Parameters Modified**: `startYear`, `endYear`
-- **State Change**: Filters temporal data across visualizations
+**Multi-Player Selection**
+- **Trigger**: Click events on player list items and elite shooter cards
+- **Parameter Modified**: `selectedPlayers` (Set)
+- **State Change**: Adds/removes players from comparison visualization
 - **Affordances**:
-  - Live updating year labels during interaction
-  - Visual slider styling indicates draggable elements
-  - Dual sliders clearly indicate range selection capability
-  - Immediate chart updates provide feedback
+  - Interactive player cards with hover effects
+  - Visual selection state (orange highlighting)
+  - Top 30 player rankings with career statistics
+  - Synchronized selection across multiple UI sections
 
-**View Mode Toggle Buttons**
-- **Trigger**: Click events on toggle button group
-- **Parameter Modified**: `viewMode`
-- **State Change**: Switches analytical perspective in Scene 4
+**Multi-Team Selection**
+- **Trigger**: Click events on team filter options
+- **Parameter Modified**: `selectedTeams` (Set)
+- **State Change**: Adds/removes teams from trend analysis
 - **Affordances**:
-  - Active state styling (blue background, white text)
-  - Button grouping suggests mutually exclusive options
-  - Descriptive labels indicate different analytical modes
-  - Smooth transitions between modes
+  - Conference-organized layout (Eastern/Western)
+  - Division-based grouping for logical organization
+  - Visual selection feedback with color coding
+  - Clear team identification with consistent styling
+
+**Time Range Controls**
+- **Trigger**: Click events on era buttons and range selectors
+- **Parameter Modified**: `timeRange.start`, `timeRange.end`
+- **State Change**: Filters all temporal data and recalculates statistics
+- **Affordances**:
+  - Era-based shortcuts (Early Era, Golden Era, Modern Era)
+  - Immediate visualization updates
+  - Contextual filtering across all chart types
+  - Clear temporal boundaries with visual feedback
 
 #### Timeline Animation Triggers
 
@@ -566,11 +600,20 @@ The visualization provides multiple trigger mechanisms connecting user actions t
 - **Hierarchical Layout**: Most important controls prominently positioned
 - **Immediate Feedback**: All interactions provide instant visual response
 
+#### Enhanced Explorer Affordances
+- **Multi-Selection Feedback**: Selected players/teams highlighted with consistent orange theming
+- **Real-Time Visualization**: Charts update immediately upon selection changes
+- **Synchronized UI State**: Selections reflected across all relevant interface sections
+- **Professional Design Language**: Glass morphism effects, consistent spacing, modern typography
+- **Contextual Information**: Career statistics, rankings, and performance metrics displayed alongside selections
+- **Visual Hierarchy**: Three-column layout clearly separates controls, visualization, and insights
+
 #### Accessibility Considerations
 - **Keyboard Navigation**: All interactive elements accessible via keyboard
 - **Focus States**: Clear focus indicators for accessibility compliance
 - **ARIA Labels**: Proper semantic labeling for screen readers
 - **Color Independence**: Interactive states don't rely solely on color
+- **Responsive Design**: Consistent experience across different screen sizes and devices
 
 ### Trigger Performance and Responsiveness
 
