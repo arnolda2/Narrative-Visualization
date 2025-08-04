@@ -31,7 +31,7 @@ def calculate_league_trends(df):
         made_shots = len(season_data[season_data['SHOT_MADE'] == True])
         made_threes = len(season_data[(season_data['SHOT_TYPE'] == '3PT Field Goal') & (season_data['SHOT_MADE'] == True)])
         
-        # Calculate percentages and efficiency
+        # Calculate percentages andefficiency
         three_pt_rate = (three_pt_shots / total_shots) * 100
         mid_range_rate = (mid_range_shots / total_shots) * 100
         fg_percentage = (made_shots / total_shots) * 100
