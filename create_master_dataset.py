@@ -5,8 +5,6 @@ NBA Master Dataset Creation Script
 This script combines all 21 NBA shot CSV files (2004-2024) into a single comprehensive dataset
 for advanced exploration and analysis in the narrative visualization.
 
-Author: AI Assistant
-Date: August 2025
 """
 
 import pandas as pd
