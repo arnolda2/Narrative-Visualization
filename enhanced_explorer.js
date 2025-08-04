@@ -78,14 +78,14 @@ class NBAAdvancedExplorer {
 
     createFullUIHTML() {
         return `
-            <div style="display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; max-height: 650px; height: auto; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 20px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; min-height: 600px; height: auto; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 20px;">
                 <!-- Control Panel -->
-                <div style="background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border: 1px solid #e2e8f0;">
+                <div style="background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border: 1px solid #e2e8f0; max-height: 600px;">
                     ${this.createControlPanelHTML()}
                 </div>
                 
                 <!-- Main Visualization -->
-                <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; min-height: 500px;">
                     ${this.createVisualizationAreaHTML()}
                 </div>
                 
@@ -124,7 +124,7 @@ class NBAAdvancedExplorer {
                         🌄 Western
                     </button>
                 </div>
-                <div id="team-divisions-container"></div>
+                <div id="team-divisions-container" style="max-height: 300px; overflow-y: auto;"></div>
             </div>
 
             <div id="player-filter-section" style="display: none; margin-bottom: 24px;">
@@ -138,7 +138,7 @@ class NBAAdvancedExplorer {
 
             <div id="shooters-section" style="display: none; margin-bottom: 24px;">
                 <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🎯 Top 30 Elite Shooters</h3>
-                <div id="top-shooters-list"></div>
+                <div id="top-shooters-list" style="max-height: 300px; overflow-y: auto;"></div>
             </div>
 
             <div style="margin-bottom: 24px;">
@@ -174,8 +174,8 @@ class NBAAdvancedExplorer {
                     </div>
                 </div>
             </div>
-            <div style="flex: 1; position: relative; overflow: hidden;">
-                <svg id="advanced-main-chart" style="width: 100%; height: 100%; background: #fafbfc; border-radius: 8px;"></svg>
+            <div style="flex: 1; position: relative; min-height: 400px; height: auto;">
+                <svg id="advanced-main-chart" style="width: 100%; height: 400px; background: #fafbfc; border-radius: 8px;"></svg>
             </div>
             <div id="chart-insights" style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
         `;
