@@ -1,18 +1,14 @@
-// NBA Three-Point Revolution - Enhanced Interactive Dashboard
-// Modern JavaScript with D3.js for comprehensive basketball analytics
-
-// Global configuration and state
 const CONFIG = {
-    // Responsive dimensions
+
     width: 1000,
     height: 600,
     margin: { top: 60, right: 80, bottom: 80, left: 80 },
     
-    // Animation settings
+
     transitionDuration: 1000,
     delayBetweenElements: 50,
     
-    // Colors (matching CSS variables)
+
     colors: {
         threePt: '#ea580c',
         midRange: '#1e40af', 
@@ -24,7 +20,7 @@ const CONFIG = {
     }
 };
 
-// Global state management
+
 let state = {
     currentScene: 0,
     totalScenes: 5,
@@ -546,9 +542,9 @@ function drawCurrentScene() {
 // Scene 0: Enhanced Overview with better design
 function drawScene0_Overview() {
     try {
-        console.log('🎨 Drawing Scene 0: Overview');
+
         const { svg, g, width, height } = utils.setupSVG('#main-visualization');
-        console.log('✅ SVG setup complete');
+
         
         const data = state.data.scene1;
         if (!data) {
