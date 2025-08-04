@@ -78,7 +78,7 @@ class NBAAdvancedExplorer {
 
     createFullUIHTML() {
         return `
-            <div style="display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; height: 700px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: 350px 1fr 300px; gap: 20px; max-height: 650px; height: auto; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 20px; overflow: hidden;">
                 <!-- Control Panel -->
                 <div style="background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border: 1px solid #e2e8f0;">
                     ${this.createControlPanelHTML()}

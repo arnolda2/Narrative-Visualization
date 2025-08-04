@@ -368,6 +368,12 @@ function initializeEventListeners() {
     if (prevBtn) prevBtn.addEventListener('click', () => changeScene(state.currentScene - 1));
     if (nextBtn) nextBtn.addEventListener('click', () => changeScene(state.currentScene + 1));
     
+    // Scene navigation buttons (smaller ones under tabs) - safe access
+    const scenePrevBtn = document.getElementById('scene-prev-btn');
+    const sceneNextBtn = document.getElementById('scene-next-btn');
+    if (scenePrevBtn) scenePrevBtn.addEventListener('click', () => changeScene(state.currentScene - 1));
+    if (sceneNextBtn) sceneNextBtn.addEventListener('click', () => changeScene(state.currentScene + 1));
+    
     // Analysis type toggle
     document.querySelectorAll('.analysis-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -483,9 +489,15 @@ function updateNavigation() {
         dot.classList.toggle('active', index === state.currentScene);
     });
     
-    // Update navigation buttons
+    // Update navigation buttons (both bottom and scene nav buttons)
     document.getElementById('prev-btn').disabled = state.currentScene === 0;
     document.getElementById('next-btn').disabled = state.currentScene === state.totalScenes - 1;
+    
+    // Update scene navigation buttons
+    const scenePrevBtn = document.getElementById('scene-prev-btn');
+    const sceneNextBtn = document.getElementById('scene-next-btn');
+    if (scenePrevBtn) scenePrevBtn.disabled = state.currentScene === 0;
+    if (sceneNextBtn) sceneNextBtn.disabled = state.currentScene === state.totalScenes - 1;
     
     // Update scene counter
     document.getElementById('current-scene-num').textContent = state.currentScene + 1;
@@ -509,9 +521,13 @@ function updateSceneVisibility() {
     const explorerDashboard = document.getElementById('explorer-dashboard');
     const timelineNav = document.getElementById('timeline-nav');
     const secondaryPanels = document.getElementById('secondary-panels');
+    const mainVisualization = document.getElementById('main-visualization');
     
     explorerDashboard.style.display = state.currentScene === 4 ? 'block' : 'none';
     timelineNav.style.display = state.currentScene === 1 ? 'block' : 'none';
+    
+    // Show/hide main visualization - hide for explorer, show for all other scenes
+    mainVisualization.style.display = state.currentScene === 4 ? 'none' : 'block';
     
     // Clear secondary panels
     secondaryPanels.innerHTML = '';

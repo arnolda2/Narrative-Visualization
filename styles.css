@@ -161,7 +161,9 @@ body {
 .scene-nav {
     margin-bottom: var(--spacing-xl);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
 }
 
 .nav-pills {
@@ -195,6 +197,39 @@ body {
 .nav-pill:hover:not(.active) {
     background: var(--gray-light);
     color: var(--dark);
+}
+
+/* Scene Navigation Buttons (smaller version under tabs) */
+.scene-nav-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.scene-nav-button {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    min-width: 80px;
+}
+
+.scene-nav-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.scene-nav-button:disabled {
+    background: var(--gray-medium);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
 }
 
 /* Scene Content */
@@ -288,6 +323,8 @@ body {
     box-shadow: var(--shadow-lg);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .explorer-controls {
