@@ -765,15 +765,20 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             return;
         }
 
-        // Debug: Check selected teams and available team data
-        console.log('Selected teams:', Array.from(this.selectedTeams));
-        console.log('Available teams in master data:', this.data.team_data.map(t => t.team));
+        // Enhanced debugging
+        console.log('🏟️ Selected teams:', Array.from(this.selectedTeams));
+        console.log('🏟️ Available team data structure:', this.data.team_data?.length || 0, 'teams');
+        if (this.data.team_data && this.data.team_data.length > 0) {
+            console.log('🏟️ First team structure:', this.data.team_data[0]);
+            console.log('🏟️ All available team names:', this.data.team_data.map(t => t.team).slice(0, 10));
+        }
         
         const selectedTeamData = this.data.team_data.filter(team => 
             this.selectedTeams.has(team.team)
         );
         
-        console.log('Found team data for:', selectedTeamData.map(t => t.team));
+        console.log('🏟️ Found team data for:', selectedTeamData.map(t => t.team));
+        console.log('🏟️ Selected team data count:', selectedTeamData.length);
 
         const allSeasons = [];
         selectedTeamData.forEach(team => {
