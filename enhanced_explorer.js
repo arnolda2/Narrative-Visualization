@@ -814,7 +814,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             .range([0, width]);
 
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(allSeasons, d => d.three_pt_attempts)])
+            .domain([0, d3.max(allSeasons, d => d.three_pt_shots)])
             .range([height, 0]);
 
         const colorScale = d3.scaleOrdinal()
@@ -854,7 +854,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
         // Lines for each team
         const line = d3.line()
             .x(d => xScale(d.season))
-            .y(d => yScale(d.three_pt_attempts))
+                            .y(d => yScale(d.three_pt_shots))
             .curve(d3.curveMonotoneX);
 
         selectedTeamData.forEach((team, index) => {
@@ -879,7 +879,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .enter()
                 .append('circle')
                 .attr('cx', d => xScale(d.season))
-                .attr('cy', d => yScale(d.three_pt_attempts))
+                .attr('cy', d => yScale(d.three_pt_shots))
                 .attr('r', 4)
                 .attr('fill', colorScale(team.team))
                 .attr('stroke', 'white')
@@ -888,7 +888,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .on('mouseover', (event, d) => {
                     this.showAdvancedTooltip(event, `
                         <strong>${team.team} - ${d.season}</strong><br/>
-                        3PT Attempts: ${d.three_pt_attempts?.toLocaleString() || 'N/A'}<br/>
+                        3PT Attempts: ${d.three_pt_shots?.toLocaleString() || 'N/A'}<br/>
                         3PT Made: ${d.three_pt_made?.toLocaleString() || 'N/A'}<br/>
                         3PT %: ${d.three_pt_percentage || 'N/A'}%
                     `);
@@ -1037,7 +1037,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             // Use seasons_data from topShooters instead of seasons from master data
             const allPlayerSeasons = player.seasons_data || player.seasons || [];
             const playerSeasons = allPlayerSeasons.filter(s => 
-                s.year >= this.timeRange.start && s.year <= this.timeRange.end
+                s.season >= this.timeRange.start && s.season <= this.timeRange.end
             );
 
             if (playerSeasons.length === 0) return;
@@ -1065,9 +1065,9 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .style('cursor', 'pointer')
                 .on('mouseover', (event, d) => {
                     this.showAdvancedTooltip(event, `
-                        <strong>${player.player} - ${d.year}</strong><br/>
+                        <strong>${player.player} - ${d.season}</strong><br/>
                         3PT%: ${d.three_pt_percentage || 'N/A'}%<br/>
-                        Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_attempts || 'N/A'}<br/>
+                        Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_shots || 'N/A'}<br/>
                         Team: ${d.team || 'N/A'}
                     `);
                 })
