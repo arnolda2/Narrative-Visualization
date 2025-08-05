@@ -31,17 +31,23 @@ class NBAAdvancedExplorer {
 
     async loadMasterData() {
         try {
+            console.log('🔄 Loading master dataset...');
             const [masterData, topShooters] = await Promise.all([
                 d3.json('data/master_three_point_data.json'),
                 d3.json('data/top_30_three_point_shooters.json')
             ]);
             
+            console.log('✅ Master data loaded:', masterData ? 'Success' : 'Failed');
+            console.log('✅ Top shooters loaded:', topShooters ? 'Success' : 'Failed');
+            
             this.data = masterData;
             this.topShooters = topShooters;
             
+            console.log('✅ All master data successfully loaded and assigned');
 
         } catch (error) {
             console.error('❌ Error loading master data:', error);
+            console.error('❌ Failed URLs:', ['data/master_three_point_data.json', 'data/top_30_three_point_shooters.json']);
             throw new Error('Could not load master dataset');
         }
     }
