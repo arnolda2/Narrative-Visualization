@@ -1037,7 +1037,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
             // Use seasons_data from topShooters instead of seasons from master data
             const allPlayerSeasons = player.seasons_data || player.seasons || [];
             const playerSeasons = allPlayerSeasons.filter(s => 
-                s.season >= this.timeRange.start && s.season <= this.timeRange.end
+                s.year >= this.timeRange.start && s.year <= this.timeRange.end
             );
 
             if (playerSeasons.length === 0) return;
@@ -1065,7 +1065,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .style('cursor', 'pointer')
                 .on('mouseover', (event, d) => {
                     this.showAdvancedTooltip(event, `
-                        <strong>${player.player} - ${d.season}</strong><br/>
+                        <strong>${player.player} - ${d.year}</strong><br/>
                         3PT%: ${d.three_pt_percentage || 'N/A'}%<br/>
                         Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_shots || 'N/A'}<br/>
                         Team: ${d.team || 'N/A'}
