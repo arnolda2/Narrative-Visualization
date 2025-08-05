@@ -31,12 +31,18 @@ class NBAAdvancedExplorer {
 
     async loadMasterData() {
         try {
-            const [masterData, topShooters] = await Promise.all([
-                d3.json('data/master_three_point_data.json'),
-                d3.json('data/top_30_three_point_shooters.json')
+            const [playerData, teamData, topShooters, enhancedData] = await Promise.all([
+                d3.json('data/comprehensive_player_data.json'),
+                d3.json('data/comprehensive_team_data.json'),
+                d3.json('data/top_30_three_point_shooters.json'),
+                d3.json('data/scene4_data_enhanced.json')
             ]);
             
-            this.data = masterData;
+            this.data = {
+                players: playerData,
+                teams: teamData,
+                enhanced: enhancedData
+            };
             this.topShooters = topShooters;
             
 
