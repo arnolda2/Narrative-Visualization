@@ -140,7 +140,7 @@ class NBAAdvancedExplorer {
             </div>
 
             <div id="player-filter-section" style="display: none; margin-bottom: 24px;">
-                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Top 30 Players Selection</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #ea580c;">🏀 Top 30 Player Careers (Highest 3pt %)</h3>
                 <div id="player-list-container" style="max-height: 350px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;"></div>
                 <div style="margin-top: 16px;">
                     <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 8px 0;">Selected Players</h4>
