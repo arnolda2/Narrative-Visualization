@@ -859,7 +859,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         selectedTeamData.forEach((team, index) => {
             const teamSeasons = team.seasons.filter(s => 
-                s.year >= this.timeRange.start && s.year <= this.timeRange.end
+                s.season >= this.timeRange.start && s.season <= this.timeRange.end
             );
 
             if (teamSeasons.length === 0) return;
