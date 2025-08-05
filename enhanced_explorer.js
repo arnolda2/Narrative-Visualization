@@ -878,7 +878,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .data(teamSeasons)
                 .enter()
                 .append('circle')
-                .attr('cx', d => xScale(d.year))
+                .attr('cx', d => xScale(d.season))
                 .attr('cy', d => yScale(d.three_pt_shots))
                 .attr('r', 4)
                 .attr('fill', colorScale(team.team))
