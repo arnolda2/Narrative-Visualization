@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive NBA Data Processor
+NBA Data Processor
 Processes all NBA shot CSV files (2004-2024) to extract real team and player data
-for the enhanced exploration interface.
 """
 
 import pandas as pd
