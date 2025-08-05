@@ -25,24 +25,37 @@ class NBAAdvancedExplorer {
 
         } catch (error) {
             console.error('Failed to initialize enhanced explorer:', error);
-            this.showError('Failed to load master dataset');
+            console.error('❌ Initialization error details:', error.message);
+            console.error('❌ Initialization stack:', error.stack);
+            this.showError(`Failed to load master dataset: ${error.message}`);
         }
     }
 
     async loadMasterData() {
         try {
-            const [enhancedData, topShooters] = await Promise.all([
+            const [enhancedData, topShooters, teamConferences] = await Promise.all([
                 d3.json('data/scene4_data_enhanced.json'),
-                d3.json('data/top_30_three_point_shooters.json')
+                d3.json('data/top_30_three_point_shooters.json'),
+                d3.json('data/teams_by_conference.json')
             ]);
             
             this.data = enhancedData;
+            this.data.team_conferences = teamConferences;
             this.topShooters = topShooters;
+            
+            console.log('✅ Master data loaded successfully:', {
+                player_data: this.data.player_data?.length || 0,
+                team_data: this.data.team_data?.length || 0,
+                team_conferences: Object.keys(this.data.team_conferences || {}).length,
+                topShooters: this.topShooters?.length || 0
+            });
             
 
         } catch (error) {
             console.error('❌ Error loading master data:', error);
-            throw new Error('Could not load master dataset');
+            console.error('❌ Detailed error:', error.message);
+            console.error('❌ Stack trace:', error.stack);
+            throw new Error(`Could not load master dataset: ${error.message}`);
         }
     }
 
