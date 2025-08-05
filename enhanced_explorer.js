@@ -18,10 +18,16 @@ class NBAAdvancedExplorer {
 
     async initialize() {
         try {
-
+            console.log('🚀 Starting enhanced explorer initialization...');
+            
             await this.loadMasterData();
+            console.log('✅ Data loaded, setting up UI...');
+            
             this.setupAdvancedUI();
+            console.log('✅ UI setup complete, updating visualization...');
+            
             this.updateVisualization();
+            console.log('🎉 Enhanced explorer fully initialized!');
 
         } catch (error) {
             console.error('Failed to initialize enhanced explorer:', error);
