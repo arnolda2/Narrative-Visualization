@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-NBA Master Dataset Creation Script
+NBA Master Dataset Script
 
-This script combines all 21 NBA shot CSV files (2004-2024) into a single comprehensive dataset
-for advanced exploration and analysis in the narrative visualization.
+This script combines all 21 NBA shot CSV files (2004-2024) into a single dataset
 
 """
 
