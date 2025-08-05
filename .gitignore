@@ -1,5 +1,5 @@
 # Large data files
-*.csv
+*.csv.
 
 # OS generated files
 .DS_Store
