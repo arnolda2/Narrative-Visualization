@@ -878,7 +878,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .data(teamSeasons)
                 .enter()
                 .append('circle')
-                .attr('cx', d => xScale(d.season))
+                .attr('cx', d => xScale(d.year))
                 .attr('cy', d => yScale(d.three_pt_shots))
                 .attr('r', 4)
                 .attr('fill', colorScale(team.team))
@@ -1029,7 +1029,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
 
         // Lines for each player
         const line = d3.line()
-            .x(d => xScale(d.season))
+            .x(d => xScale(d.year))
             .y(d => yScale(d.three_pt_percentage || 0))
             .curve(d3.curveMonotoneX);
 
@@ -1056,7 +1056,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .data(playerSeasons)
                 .enter()
                 .append('circle')
-                .attr('cx', d => xScale(d.season))
+                .attr('cx', d => xScale(d.year))
                 .attr('cy', d => yScale(d.three_pt_percentage || 0))
                 .attr('r', 4)
                 .attr('fill', colorScale(player.player))
@@ -1067,7 +1067,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                     this.showAdvancedTooltip(event, `
                         <strong>${player.player} - ${d.year}</strong><br/>
                         3PT%: ${d.three_pt_percentage || 'N/A'}%<br/>
-                        Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_shots || 'N/A'}<br/>
+                        Made/Attempts: ${d.three_pt_made || 'N/A'}/${d.three_pt_attempts || 'N/A'}<br/>
                         Team: ${d.team || 'N/A'}
                     `);
                 })
