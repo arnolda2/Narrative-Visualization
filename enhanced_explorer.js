@@ -887,7 +887,7 @@ Object.assign(NBAAdvancedExplorer.prototype, {
                 .style('cursor', 'pointer')
                 .on('mouseover', (event, d) => {
                     this.showAdvancedTooltip(event, `
-                        <strong>${team.team} - ${d.year}</strong><br/>
+                        <strong>${team.team} - ${d.season}</strong><br/>
                         3PT Attempts: ${d.three_pt_attempts?.toLocaleString() || 'N/A'}<br/>
                         3PT Made: ${d.three_pt_made?.toLocaleString() || 'N/A'}<br/>
                         3PT %: ${d.three_pt_percentage || 'N/A'}%
