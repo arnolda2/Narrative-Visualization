@@ -783,14 +783,19 @@ Object.assign(NBAAdvancedExplorer.prototype, {
         const allSeasons = [];
         selectedTeamData.forEach(team => {
             team.seasons.forEach(season => {
-                if (season.year >= this.timeRange.start && season.year <= this.timeRange.end) {
+                // Fix: use season.season instead of season.year
+                if (season.season >= this.timeRange.start && season.season <= this.timeRange.end) {
                     allSeasons.push({
                         ...season,
-                        team: team.team
+                        team: team.team,
+                        year: season.season // Add year property for consistency
                     });
                 }
             });
         });
+        
+        console.log('🏟️ All seasons data:', allSeasons.length, 'seasons found');
+        console.log('🏟️ Time range:', this.timeRange.start, 'to', this.timeRange.end);
 
         if (allSeasons.length === 0) {
             g.append('text')
