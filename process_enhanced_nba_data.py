@@ -135,7 +135,7 @@ def save_enhanced_data():
     
     enhanced_data = create_enhanced_scene4_data()
     
-    # Save enhanced scene4 data
+    # Save enhanced data
     with open('data/scene4_data.json', 'w') as f:
         json.dump(enhanced_data, f, indent=2)
     

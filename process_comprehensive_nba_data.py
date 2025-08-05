@@ -12,7 +12,7 @@ import glob
 from collections import defaultdict
 import os
 
-# Team name mappings to handle relocations/rebranding
+# Team name mappings
 TEAM_NAME_MAPPINGS = {
     'New Orleans Hornets': 'New Orleans Pelicans',
     'New Orleans/Oklahoma City Hornets': 'New Orleans Pelicans', 
